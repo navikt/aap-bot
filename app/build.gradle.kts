@@ -8,7 +8,7 @@ repositories {
     maven("https://jitpack.io")
 }
 
-val aapLibsVersion = "3.5.6"
+val aapLibsVersion = "3.5.7"
 val ktorVersion = "2.1.2"
 
 dependencies {
