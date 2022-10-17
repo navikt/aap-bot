@@ -1,17 +1,9 @@
-# Idea project files
-*.iml
-.idea/
-!.idea/codeStyles/
-.run
+#
+# https://help.github.com/articles/dealing-with-line-endings/
+#
+# Linux start script should use lf
+/gradlew        text eol=lf
 
-# Gradle files
-out/
-build/
-.gradle/
+# These are Windows script files and should use crlf
+*.bat           text eol=crlf
 
-# Generated sources
-src/generated
-
-# OS specific
-.DS_Store
-.devcontainer
