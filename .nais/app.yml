@@ -9,6 +9,9 @@ metadata:
     github.url: "https://github.com/navikt/aap-bot"
 spec:
   image: {{image}}
+  kafka:
+    pool: nav-dev
+    streams: true
   secureLogs:
     enabled: true
   replicas:
