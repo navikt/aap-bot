@@ -14,4 +14,5 @@ data class OppgavestyringConfig(
     val host: URL,
     val audience: String,
     val scope: String,
+    val testbrukerPassord: String,
 )

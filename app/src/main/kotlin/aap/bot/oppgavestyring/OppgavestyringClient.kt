@@ -11,17 +11,76 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
-import no.nav.aap.ktor.client.HttpClientAzureAdTokenProvider
+import no.nav.aap.ktor.client.HttpClientUserLoginTokenProvider
 import org.slf4j.LoggerFactory
 
 private val secureLog = LoggerFactory.getLogger("secureLog")
 
-internal class OppgavestyringClient(private val config: Config) {
-    //  løsningNAY
-    //  løsningLokalkontor
-    //  kvalitetssikringNAY
-    //  kvalitetssikringLokalkontor
-    private val tokenProvider = HttpClientAzureAdTokenProvider(config.azure, config.oppgavestyring.scope)
+internal class OppgavestyringClient(
+    private val config: Config,
+    private val tokenProvider: TokenProvider = TokenProvider(config)
+) {
+    suspend fun løsningInngangsvilkår(personident: String) {
+        val (path, inngangsvilkår) = Løsning.inngangsvilkår()
+        val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
+            contentType(ContentType.Application.Json)
+            bearerAuth(tokenProvider.get(Testbruker.SAKSBEHANDLER_OG_VEILEDER))
+            setBody(inngangsvilkår)
+        }
+        require(response.status == HttpStatusCode.OK)
+    }
+
+    suspend fun løsningLokalkontor(personident: String) {
+        Løsning.lokalkontor().forEach { (path, løsning) ->
+            val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
+                contentType(ContentType.Application.Json)
+                bearerAuth(tokenProvider.get(Testbruker.SAKSBEHANDLER_OG_VEILEDER))
+                setBody(løsning)
+            }
+            require(response.status == HttpStatusCode.OK)
+        }
+    }
+
+    suspend fun løsningNAY(personident: String) {
+        Løsning.saksbehandler().forEach { (path, løsning) ->
+            val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
+                contentType(ContentType.Application.Json)
+                bearerAuth(tokenProvider.get(Testbruker.SAKSBEHANDLER_OG_VEILEDER))
+                setBody(løsning)
+            }
+            require(response.status == HttpStatusCode.OK)
+        }
+    }
+
+    suspend fun kvalitetssikreNAY(personident: String) {
+        Kvalitetssikring.pathsForNAY().forEach { path ->
+            val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
+                contentType(ContentType.Application.Json)
+                bearerAuth(tokenProvider.get(Testbruker.BESLUTTER_OG_FATTER))
+                setBody(Kvalitetssikring.godkjent())
+            }
+            require(response.status == HttpStatusCode.OK)
+        }
+    }
+
+    suspend fun kvalitetssikreLokalkontor(personident: String) {
+        Kvalitetssikring.pathsForLokalkontor().forEach { path ->
+            val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
+                contentType(ContentType.Application.Json)
+                bearerAuth(tokenProvider.get(Testbruker.BESLUTTER_OG_FATTER))
+                setBody(Kvalitetssikring.godkjent())
+            }
+            require(response.status == HttpStatusCode.OK)
+        }
+    }
+
+    suspend fun iverksett(personident: String) {
+        val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/iverksett") {
+            contentType(ContentType.Application.Json)
+            bearerAuth(tokenProvider.get(Testbruker.SAKSBEHANDLER_OG_VEILEDER))
+        }
+        require(response.status == HttpStatusCode.OK)
+    }
 
     private val httpClient = HttpClient(CIO) {
         install(HttpTimeout)
@@ -39,71 +98,12 @@ internal class OppgavestyringClient(private val config: Config) {
             }
         }
     }
+}
 
-    suspend fun løsningInngangsvilkår(personident: String) {
-        val tokenNAY = tokenProvider.getToken()
-        val (path, inngangsvilkår) = Løsning.inngangsvilkår()
-        val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
-            contentType(ContentType.Application.Json)
-            bearerAuth(tokenNAY)
-            setBody(inngangsvilkår)
-        }
-        require(response.status == HttpStatusCode.OK)
-    }
+internal class TokenProvider(private val config: Config) {
+    private val tokenProvider: HttpClientUserLoginTokenProvider =
+        HttpClientUserLoginTokenProvider(config.azure, config.oppgavestyring.scope)
 
-    suspend fun løsningLokalkontor(personident: String) {
-        val tokenLokal = tokenProvider.getToken()
-        Løsning.lokalkontor().forEach { (path, løsning) ->
-            val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
-                contentType(ContentType.Application.Json)
-                bearerAuth(tokenLokal)
-                setBody(løsning)
-            }
-            require(response.status == HttpStatusCode.OK)
-        }
-    }
-    suspend fun løsningNAY(personident: String) {
-        val tokenNAY = tokenProvider.getToken()
-        Løsning.saksbehandler().forEach { (path, løsning) ->
-            val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
-                contentType(ContentType.Application.Json)
-                bearerAuth(tokenNAY)
-                setBody(løsning)
-            }
-            require(response.status == HttpStatusCode.OK)
-        }
-    }
-
-    suspend fun kvalitetssikreNAY(personident: String) {
-        val tokenNAY = tokenProvider.getToken()
-        Kvalitetssikring.pathsForNAY().forEach { path ->
-            val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
-                contentType(ContentType.Application.Json)
-                bearerAuth(tokenNAY)
-                setBody(Kvalitetssikring.godkjent())
-            }
-            require(response.status == HttpStatusCode.OK)
-        }
-    }
-    suspend fun kvalitetssikreLokalkontor(personident: String) {
-        val tokenLokal = tokenProvider.getToken()
-        Kvalitetssikring.pathsForLokalkontor().forEach { path ->
-            val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
-                contentType(ContentType.Application.Json)
-                bearerAuth(tokenLokal)
-                setBody(Kvalitetssikring.godkjent())
-            }
-            require(response.status == HttpStatusCode.OK)
-        }
-    }
-
-    suspend fun iverksett(personident: String) {
-        val tokenLokal = tokenProvider.getToken()
-
-        val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/iverksett") {
-            contentType(ContentType.Application.Json)
-            bearerAuth(tokenLokal)
-        }
-        require(response.status == HttpStatusCode.OK)
-    }
+    internal suspend fun get(bruker: Testbruker): String =
+        tokenProvider.getToken(bruker.epost, config.oppgavestyring.testbrukerPassord)
 }

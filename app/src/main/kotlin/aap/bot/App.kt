@@ -8,9 +8,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import org.slf4j.LoggerFactory
-
-private val secureLog = LoggerFactory.getLogger("secureLog")
 
 fun main() {
     embeddedServer(Netty, port = 8080, module = Application::bot).start(wait = true)
