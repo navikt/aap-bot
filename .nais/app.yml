@@ -12,6 +12,13 @@ spec:
   kafka:
     pool: nav-dev
     streams: true
+  accessPolicy:
+    outbound:
+      rules:
+        - application: oppgavestyring
+  azure:
+    application:
+      enabled: true
   secureLogs:
     enabled: true
   replicas:

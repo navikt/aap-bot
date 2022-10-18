@@ -1,0 +1,18 @@
+oppgavestyring:
+  host: http://oppgavestyring
+  audience: dev-gcp:aap:oppgavestyring
+  scope: api://dev-gcp.aap.oppgavestyring/.default
+
+azure:
+  tokenEndpoint: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+  clientId: ${AZURE_APP_CLIENT_ID}
+  clientSecret: ${AZURE_APP_CLIENT_SECRET}
+
+
+kafka:
+  application-id: ${KAFKA_STREAMS_APPLICATION_ID}
+  brokers: ${KAFKA_BROKERS}
+  ssl:
+    truststorePath: ${KAFKA_TRUSTSTORE_PATH}
+    keystorePath: ${KAFKA_KEYSTORE_PATH}
+    credstorePsw: ${KAFKA_CREDSTORE_PASSWORD}
