@@ -20,64 +20,64 @@ internal class OppgavestyringClient(
     private val config: Config,
     private val tokenProvider: TokenProvider = TokenProvider(config)
 ) {
-    suspend fun løsningInngangsvilkår(personident: String) {
-        val (path, inngangsvilkår) = Løsning.inngangsvilkår()
-        val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
-            contentType(ContentType.Application.Json)
-            bearerAuth(tokenProvider.get(Testbruker.SAKSBEHANDLER_OG_VEILEDER))
-            setBody(inngangsvilkår)
+    suspend fun løsningInngangsvilkår(
+        personident: String,
+        bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER,
+    ) {
+        Løsning.inngangsvilkår().forEach { (path, løsning) ->
+            send(personident, path, bruker, løsning)
         }
-        require(response.status == HttpStatusCode.OK)
     }
 
-    suspend fun løsningLokalkontor(personident: String) {
+    suspend fun løsningLokalkontor(
+        personident: String,
+        bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER,
+    ) {
         Løsning.lokalkontor().forEach { (path, løsning) ->
-            val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
-                contentType(ContentType.Application.Json)
-                bearerAuth(tokenProvider.get(Testbruker.SAKSBEHANDLER_OG_VEILEDER))
-                setBody(løsning)
-            }
-            require(response.status == HttpStatusCode.OK)
+            send(personident, path, bruker, løsning)
         }
     }
 
-    suspend fun løsningNAY(personident: String) {
+    suspend fun løsningNAY(
+        personident: String,
+        bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER,
+    ) {
         Løsning.saksbehandler().forEach { (path, løsning) ->
-            val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
-                contentType(ContentType.Application.Json)
-                bearerAuth(tokenProvider.get(Testbruker.SAKSBEHANDLER_OG_VEILEDER))
-                setBody(løsning)
-            }
-            require(response.status == HttpStatusCode.OK)
+            send(personident, path, bruker, løsning)
         }
     }
 
-    suspend fun kvalitetssikreNAY(personident: String) {
-        Kvalitetssikring.pathsForNAY().forEach { path ->
-            val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
-                contentType(ContentType.Application.Json)
-                bearerAuth(tokenProvider.get(Testbruker.BESLUTTER_OG_FATTER))
-                setBody(Kvalitetssikring.godkjent())
-            }
-            require(response.status == HttpStatusCode.OK)
+    suspend fun kvalitetssikreNAY(
+        personident: String,
+        bruker: Testbruker = Testbruker.BESLUTTER_OG_FATTER,
+    ) {
+        Kvalitetssikring.nay(bruker).forEach { (path, kvalitetssikring) ->
+            send(personident, path, bruker, kvalitetssikring)
         }
     }
 
-    suspend fun kvalitetssikreLokalkontor(personident: String) {
-        Kvalitetssikring.pathsForLokalkontor().forEach { path ->
-            val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
-                contentType(ContentType.Application.Json)
-                bearerAuth(tokenProvider.get(Testbruker.BESLUTTER_OG_FATTER))
-                setBody(Kvalitetssikring.godkjent())
-            }
-            require(response.status == HttpStatusCode.OK)
+    suspend fun kvalitetssikreLokalkontor(
+        personident: String,
+        bruker: Testbruker = Testbruker.BESLUTTER_OG_FATTER,
+    ) {
+        Kvalitetssikring.lokalkontor(bruker).forEach { (path, kvalitetssikring) ->
+            send(personident, path, bruker, kvalitetssikring)
         }
     }
 
     suspend fun iverksett(personident: String) {
         val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/iverksett") {
             contentType(ContentType.Application.Json)
-            bearerAuth(tokenProvider.get(Testbruker.SAKSBEHANDLER_OG_VEILEDER))
+            bearerAuth(tokenProvider.getAccessToken(Testbruker.SAKSBEHANDLER_OG_VEILEDER))
+        }
+        require(response.status == HttpStatusCode.OK)
+    }
+
+    private suspend fun send(personident: String, path: String, bruker: Testbruker, body: Any) {
+        val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
+            contentType(ContentType.Application.Json)
+            bearerAuth(tokenProvider.getAccessToken(bruker))
+            setBody(body)
         }
         require(response.status == HttpStatusCode.OK)
     }
@@ -104,6 +104,6 @@ internal class TokenProvider(private val config: Config) {
     private val tokenProvider: HttpClientUserLoginTokenProvider =
         HttpClientUserLoginTokenProvider(config.azure, config.oppgavestyring.scope)
 
-    internal suspend fun get(bruker: Testbruker): String =
+    internal suspend fun getAccessToken(bruker: Testbruker): String =
         tokenProvider.getToken(bruker.epost, config.oppgavestyring.testbrukerPassord)
 }

@@ -21,23 +21,25 @@ data class Løsning(
     val data: Any
 ) {
     companion object {
-        fun inngangsvilkår() = Løsning(
-            path = "losning/inngangsvilkar",
-            data = Inngangsvilkår(
-                løsning_11_2 = Løsning_11_2_manuell(
-                    vurdertAv = "Z999999",
-                    tidspunktForVurdering = LocalDateTime.now(),
-                    erMedlem = "JA",
-                ),
-                løsning_11_3 = Løsning_11_3_manuell(
-                    vurdertAv = "Z999999",
-                    tidspunktForVurdering = LocalDateTime.now(),
-                    erOppfylt = true,
-                ),
-                løsning_11_4 = Løsning_11_4_ledd2_ledd3_manuell(
-                    vurdertAv = "Z999999",
-                    tidspunktForVurdering = LocalDateTime.now(),
-                    erOppfylt = true,
+        fun inngangsvilkår() = listOf(
+            Løsning(
+                path = "losning/inngangsvilkar",
+                data = Inngangsvilkår(
+                    løsning_11_2 = Løsning_11_2_manuell(
+                        vurdertAv = "Z999999",
+                        tidspunktForVurdering = LocalDateTime.now(),
+                        erMedlem = "JA",
+                    ),
+                    løsning_11_3 = Løsning_11_3_manuell(
+                        vurdertAv = "Z999999",
+                        tidspunktForVurdering = LocalDateTime.now(),
+                        erOppfylt = true,
+                    ),
+                    løsning_11_4 = Løsning_11_4_ledd2_ledd3_manuell(
+                        vurdertAv = "Z999999",
+                        tidspunktForVurdering = LocalDateTime.now(),
+                        erOppfylt = true,
+                    )
                 )
             )
         )
