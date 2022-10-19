@@ -16,27 +16,27 @@ data class Inngangsvilkår(
     val løsning_11_4: Løsning_11_4_ledd2_ledd3_manuell,
 )
 
-data class Løsning(
+data class Løsninger(
     val path: String,
     val data: Any
 ) {
     companion object {
-        fun inngangsvilkår() = listOf(
-            Løsning(
+        fun inngangsvilkår(vurdertAv: String) = listOf(
+            Løsninger(
                 path = "losning/inngangsvilkar",
                 data = Inngangsvilkår(
                     løsning_11_2 = Løsning_11_2_manuell(
-                        vurdertAv = "Z999999",
+                        vurdertAv = vurdertAv,
                         tidspunktForVurdering = LocalDateTime.now(),
                         erMedlem = "JA",
                     ),
                     løsning_11_3 = Løsning_11_3_manuell(
-                        vurdertAv = "Z999999",
+                        vurdertAv = vurdertAv,
                         tidspunktForVurdering = LocalDateTime.now(),
                         erOppfylt = true,
                     ),
                     løsning_11_4 = Løsning_11_4_ledd2_ledd3_manuell(
-                        vurdertAv = "Z999999",
+                        vurdertAv = vurdertAv,
                         tidspunktForVurdering = LocalDateTime.now(),
                         erOppfylt = true,
                     )
@@ -44,41 +44,51 @@ data class Løsning(
             )
         )
 
-        fun lokalkontor() = listOf(
-            Løsning(
+        fun fraLokalkontor(vurdertAv: String) = listOf(
+            Løsninger(
                 path = "losning/paragraf_11_5",
                 data = Løsning_11_5_manuell(
-                    vurdertAv = "Z999999",
+                    vurdertAv = vurdertAv,
                     tidspunktForVurdering = LocalDateTime.now(),
                     kravOmNedsattArbeidsevneErOppfylt = true,
                     nedsettelseSkyldesSykdomEllerSkade = true,
                 )
+            ),
+            Løsninger(
+                path = "innstilling/paragraf_11_6",
+                data = Løsning_11_6_manuell(
+                    vurdertAv = vurdertAv,
+                    tidspunktForVurdering = LocalDateTime.now(),
+                    harBehovForBehandling = true,
+                    harBehovForTiltak = true,
+                    harMulighetForÅKommeIArbeid = true,
+                )
             )
         )
 
-        fun saksbehandler() = listOf(
-            Løsning(
+        fun resten(vurdertAv: String) = listOf(
+            Løsninger(
                 path = "losning/paragraf_11_6",
                 data = Løsning_11_6_manuell(
-                    vurdertAv = "Z999999",
+                    vurdertAv = vurdertAv,
                     tidspunktForVurdering = LocalDateTime.now(),
                     harBehovForBehandling = true,
                     harBehovForTiltak = true,
                     harMulighetForÅKommeIArbeid = true,
                 )
             ),
-            Løsning(
+            Løsninger(
                 path = "losning/paragraf_11_19",
                 data = Løsning_11_19_manuell(
-                    vurdertAv = "Z999999",
+                    vurdertAv = vurdertAv,
                     tidspunktForVurdering = LocalDateTime.now(),
                     beregningsdato = LocalDate.now(),
                 )
             ),
-            Løsning(
+            Løsninger(
                 path = "losning/paragraf_22_13",
                 data = Løsning_22_13_manuell(
-                    vurdertAv = "Z999999",
+                    vurdertAv = vurdertAv,
                     tidspunktForVurdering = LocalDateTime.now(),
                     bestemmesAv = "Z999999",
                     unntak = "unntak",

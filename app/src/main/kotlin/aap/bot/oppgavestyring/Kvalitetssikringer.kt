@@ -10,13 +10,13 @@ import no.nav.aap.dto.kafka.Kvalitetssikring_22_13
 import java.time.LocalDateTime
 import java.util.*
 
-data class Kvalitetssikring(
+data class Kvalitetssikringer(
     val path: String,
     val data: Any,
 ) {
     companion object {
         fun lokalkontor(kvalitetssikrer: Testbruker) = listOf(
-            Kvalitetssikring(
+            Kvalitetssikringer(
                 path = "kvalitetssikre/paragraf_11_5",
                 data = Kvalitetssikring_11_2(
                     løsningId = UUID.randomUUID(),
@@ -29,7 +29,7 @@ data class Kvalitetssikring(
         )
 
         fun nay(kvalitetssikrer: Testbruker) = listOf(
-            Kvalitetssikring(
+            Kvalitetssikringer(
                 path = "kvalitetssikre/paragraf_11_2",
                 data = Kvalitetssikring_11_2(
                     løsningId = UUID.randomUUID(),
@@ -39,7 +39,7 @@ data class Kvalitetssikring(
                     begrunnelse = "Godkjent"
                 )
             ),
-            Kvalitetssikring(
+            Kvalitetssikringer(
                 path = "kvalitetssikre/paragraf_11_5",
                 data = Kvalitetssikring_11_5(
                     løsningId = UUID.randomUUID(),
@@ -49,7 +49,7 @@ data class Kvalitetssikring(
                     begrunnelse = "Godkjent"
                 )
             ),
-            Kvalitetssikring(
+            Kvalitetssikringer(
                 path = "kvalitetssikre/paragraf_11_3",
                 data = Kvalitetssikring_11_3(
                     løsningId = UUID.randomUUID(),
@@ -59,7 +59,7 @@ data class Kvalitetssikring(
                     begrunnelse = "Godkjent"
                 )
             ),
-            Kvalitetssikring(
+            Kvalitetssikringer(
                 path = "kvalitetssikre/paragraf_11_4_ledd2Og3",
                 data = Kvalitetssikring_11_4_ledd2_ledd3(
                     løsningId = UUID.randomUUID(),
@@ -69,7 +69,7 @@ data class Kvalitetssikring(
                     begrunnelse = "Godkjent"
                 )
             ),
-            Kvalitetssikring(
+            Kvalitetssikringer(
                 path = "kvalitetssikre/paragraf_11_6",
                 data = Kvalitetssikring_11_6(
                     løsningId = UUID.randomUUID(),
@@ -79,7 +79,7 @@ data class Kvalitetssikring(
                     begrunnelse = "Godkjent"
                 )
             ),
-            Kvalitetssikring(
+            Kvalitetssikringer(
                 path = "kvalitetssikre/paragraf_11_19",
                 data = Kvalitetssikring_11_19(
                     løsningId = UUID.randomUUID(),
@@ -89,7 +89,7 @@ data class Kvalitetssikring(
                     begrunnelse = "Godkjent"
                 )
             ),
-            Kvalitetssikring(
+            Kvalitetssikringer(
                 path = "kvalitetssikre/paragraf_22_13",
                 data = Kvalitetssikring_22_13(
                     løsningId = UUID.randomUUID(),

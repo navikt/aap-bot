@@ -1,16 +1,11 @@
 package aap.bot.oppgavestyring
 
 import aap.bot.Config
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import aap.bot.http.HttpClientFactory
 import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.jackson.*
 import no.nav.aap.ktor.client.HttpClientUserLoginTokenProvider
 import org.slf4j.LoggerFactory
 
@@ -18,57 +13,77 @@ private val secureLog = LoggerFactory.getLogger("secureLog")
 
 internal class OppgavestyringClient(
     private val config: Config,
-    private val tokenProvider: TokenProvider = TokenProvider(config)
 ) {
+    private val tokenProvider: TokenProvider = TokenProvider(config)
+    private val httpClient: HttpClient = HttpClientFactory.create(LogLevel.ALL)
+
+    /**
+     * Sendes inn først
+     */
     suspend fun løsningInngangsvilkår(
         personident: String,
-        bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER,
+        bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR,
     ) {
-        Løsning.inngangsvilkår().forEach { (path, løsning) ->
+        Løsninger.inngangsvilkår(bruker.ident).forEach { (path, løsning) ->
             send(personident, path, bruker, løsning)
         }
     }
 
+    /**
+     * Etter inngangsvilkår
+     */
     suspend fun løsningLokalkontor(
         personident: String,
-        bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER,
+        bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR,
     ) {
-        Løsning.lokalkontor().forEach { (path, løsning) ->
+        Løsninger.fraLokalkontor(bruker.ident).forEach { (path, løsning) ->
             send(personident, path, bruker, løsning)
         }
     }
 
-    suspend fun løsningNAY(
-        personident: String,
-        bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER,
-    ) {
-        Løsning.saksbehandler().forEach { (path, løsning) ->
-            send(personident, path, bruker, løsning)
-        }
-    }
-
-    suspend fun kvalitetssikreNAY(
-        personident: String,
-        bruker: Testbruker = Testbruker.BESLUTTER_OG_FATTER,
-    ) {
-        Kvalitetssikring.nay(bruker).forEach { (path, kvalitetssikring) ->
-            send(personident, path, bruker, kvalitetssikring)
-        }
-    }
-
+    /**
+     * Etter løsning lokalkontor
+     */
     suspend fun kvalitetssikreLokalkontor(
         personident: String,
-        bruker: Testbruker = Testbruker.BESLUTTER_OG_FATTER,
+        bruker: Testbruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR,
     ) {
-        Kvalitetssikring.lokalkontor(bruker).forEach { (path, kvalitetssikring) ->
+        Kvalitetssikringer.lokalkontor(bruker).forEach { (path, kvalitetssikring) ->
             send(personident, path, bruker, kvalitetssikring)
         }
     }
 
+    /**
+     * Etter kvalitetssikring lokalkontor
+     */
+    suspend fun løsningNAY(
+        personident: String,
+        bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR,
+    ) {
+        Løsninger.resten(bruker.ident).forEach { (path, løsning) ->
+            send(personident, path, bruker, løsning)
+        }
+    }
+
+    /**
+     * Etter løsning NAY
+     */
+    suspend fun kvalitetssikreNAY(
+        personident: String,
+        bruker: Testbruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR,
+    ) {
+        Kvalitetssikringer.nay(bruker).forEach { (path, kvalitetssikring) ->
+            send(personident, path, bruker, kvalitetssikring)
+        }
+    }
+
+    /**
+     * Til slutt
+     */
     suspend fun iverksett(personident: String) {
         val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/iverksett") {
             contentType(ContentType.Application.Json)
-            bearerAuth(tokenProvider.getAccessToken(Testbruker.SAKSBEHANDLER_OG_VEILEDER))
+            bearerAuth(tokenProvider.getAccessToken(Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR))
         }
         require(response.status == HttpStatusCode.OK)
     }
@@ -80,23 +95,6 @@ internal class OppgavestyringClient(
             setBody(body)
         }
         require(response.status == HttpStatusCode.OK)
-    }
-
-    private val httpClient = HttpClient(CIO) {
-        install(HttpTimeout)
-        install(HttpRequestRetry)
-        install(Logging) {
-            level = LogLevel.ALL
-            logger = object : Logger {
-                override fun log(message: String) = secureLog.info(message)
-            }
-        }
-        install(ContentNegotiation) {
-            jackson {
-                registerModule(JavaTimeModule())
-                disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            }
-        }
     }
 }
 
