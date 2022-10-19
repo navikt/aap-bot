@@ -40,16 +40,6 @@ data class Kvalitetssikringer(
                 )
             ),
             Kvalitetssikringer(
-                path = "kvalitetssikre/paragraf_11_5",
-                data = Kvalitetssikring_11_5(
-                    løsningId = UUID.randomUUID(),
-                    kvalitetssikretAv = kvalitetssikrer.ident,
-                    tidspunktForKvalitetssikring = LocalDateTime.now(),
-                    erGodkjent = true,
-                    begrunnelse = "Godkjent"
-                )
-            ),
-            Kvalitetssikringer(
                 path = "kvalitetssikre/paragraf_11_3",
                 data = Kvalitetssikring_11_3(
                     løsningId = UUID.randomUUID(),

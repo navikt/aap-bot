@@ -90,7 +90,7 @@ data class Løsninger(
                 data = Løsning_22_13_manuell(
                     vurdertAv = vurdertAv,
                     tidspunktForVurdering = LocalDateTime.now(),
-                    bestemmesAv = "Z999999",
+                    bestemmesAv = "soknadstidspunkt",
                     unntak = "unntak",
                     unntaksbegrunnelse = "unntaksbegrunnelse",
                     manueltSattVirkningsdato = LocalDate.now(),
