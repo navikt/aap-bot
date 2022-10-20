@@ -16,6 +16,10 @@ spec:
     outbound:
       rules:
         - application: oppgavestyring
+        - application: bot
+        - application: dolly-backend
+          namespace: dolly
+          cluster: dev-gcp
   azure:
     application:
       enabled: true

@@ -1,5 +1,6 @@
 package aap.bot
 
+import aap.bot.devtools.DevtoolsConfig
 import aap.bot.dolly.DollyConfig
 import no.nav.aap.kafka.streams.KStreamsConfig
 import no.nav.aap.ktor.client.AzureConfig
@@ -10,6 +11,7 @@ data class Config(
     val azure: AzureConfig,
     val kafka: KStreamsConfig,
     val dolly: DollyConfig,
+    val devtools: DevtoolsConfig,
 )
 
 data class OppgavestyringConfig(

@@ -26,18 +26,22 @@ data class DollyConfig(
 )
 
 private val log = LoggerFactory.getLogger(DollyClient::class.java)
-private const val APP_NAME = "aap-kelmira"
+private const val APP_NAME = "aap-bot"
+
+enum class Gruppe(val id: String) {
+    AAP_HAPPY_BOT("5865")
+}
 
 class DollyClient(private val dollyConfig: DollyConfig, azureConfig: AzureConfig) {
     private val tokenProvider = HttpClientAzureAdTokenProvider(azureConfig, dollyConfig.scope)
 
     private val httpClient = HttpClientFactory.create(LogLevel.ALL)
 
-    suspend fun hentBrukere(gruppe: String): List<DollyResponsePerson> {
+    suspend fun hentBrukere(gruppe: Gruppe): List<DollyResponsePerson> {
         val token = tokenProvider.getToken()
         val callId = callId
 
-        val brukereForGruppe = httpClient.get("${dollyConfig.url}/gruppe/$gruppe") {
+        val brukereForGruppe = httpClient.get("${dollyConfig.url}/gruppe/${gruppe.id}") {
             accept(ContentType.Application.Json)
             header("Nav-Call-Id", callId)
             header("Nav-Consumer-Id", APP_NAME)

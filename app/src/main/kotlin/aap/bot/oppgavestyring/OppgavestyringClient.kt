@@ -1,20 +1,19 @@
 package aap.bot.oppgavestyring
 
-import aap.bot.Config
+import aap.bot.OppgavestyringConfig
 import aap.bot.http.HttpClientFactory
 import io.ktor.client.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import no.nav.aap.ktor.client.AzureConfig
 import no.nav.aap.ktor.client.HttpClientUserLoginTokenProvider
-import org.slf4j.LoggerFactory
-
-private val secureLog = LoggerFactory.getLogger("secureLog")
 
 internal class OppgavestyringClient(
-    private val config: Config,
+    private val oppgavestyring: OppgavestyringConfig,
+    azure: AzureConfig,
 ) {
-    private val tokenProvider: TokenProvider = TokenProvider(config)
+    private val tokenProvider: TokenProvider = TokenProvider(oppgavestyring, azure)
     private val httpClient: HttpClient = HttpClientFactory.create(LogLevel.ALL)
 
     /**
@@ -81,7 +80,7 @@ internal class OppgavestyringClient(
      * Til slutt
      */
     suspend fun iverksett(personident: String) {
-        val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/iverksett") {
+        val response = httpClient.post("${oppgavestyring.host}/sak/$personident/iverksett") {
             contentType(ContentType.Application.Json)
             bearerAuth(tokenProvider.getAccessToken(Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR))
         }
@@ -89,7 +88,7 @@ internal class OppgavestyringClient(
     }
 
     private suspend fun send(personident: String, path: String, bruker: Testbruker, body: Any) {
-        val response = httpClient.post("${config.oppgavestyring.host}/sak/$personident/$path") {
+        val response = httpClient.post("${oppgavestyring.host}/sak/$personident/$path") {
             contentType(ContentType.Application.Json)
             bearerAuth(tokenProvider.getAccessToken(bruker))
             setBody(body)
@@ -98,10 +97,12 @@ internal class OppgavestyringClient(
     }
 }
 
-internal class TokenProvider(private val config: Config) {
-    private val tokenProvider: HttpClientUserLoginTokenProvider =
-        HttpClientUserLoginTokenProvider(config.azure, config.oppgavestyring.scope)
+internal class TokenProvider(
+    private val oppgavestyring: OppgavestyringConfig,
+    azure: AzureConfig,
+) {
+    private val tokenProvider = HttpClientUserLoginTokenProvider(azure, oppgavestyring.scope)
 
     internal suspend fun getAccessToken(bruker: Testbruker): String =
-        tokenProvider.getToken(bruker.epost, config.oppgavestyring.testbrukerPassord)
+        tokenProvider.getToken(bruker.epost, oppgavestyring.testbrukerPassord)
 }
