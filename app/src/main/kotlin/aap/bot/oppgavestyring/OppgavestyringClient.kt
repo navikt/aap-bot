@@ -6,8 +6,8 @@ import io.ktor.client.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import no.nav.aap.ktor.client.AzureAdTokenProvider
 import no.nav.aap.ktor.client.AzureConfig
-import no.nav.aap.ktor.client.HttpClientUserLoginTokenProvider
 
 internal class OppgavestyringClient(
     private val oppgavestyring: OppgavestyringConfig,
@@ -101,8 +101,8 @@ internal class TokenProvider(
     private val oppgavestyring: OppgavestyringConfig,
     azure: AzureConfig,
 ) {
-    private val tokenProvider = HttpClientUserLoginTokenProvider(azure, oppgavestyring.scope)
+    private val tokenProvider = AzureAdTokenProvider(azure, oppgavestyring.scope)
 
     internal suspend fun getAccessToken(bruker: Testbruker): String =
-        tokenProvider.getToken(bruker.epost, oppgavestyring.testbrukerPassord)
+        tokenProvider.getUsernamePasswordToken(bruker.epost, oppgavestyring.testbrukerPassord)
 }
