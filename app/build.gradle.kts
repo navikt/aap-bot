@@ -6,17 +6,16 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
-    maven("https://jitpack.io")
 }
 
-val aapLibsVersion = "3.5.20"
+val aapLibsVersion = "3.5.22"
 val ktorVersion = "2.1.2"
 
 dependencies {
     implementation("com.github.navikt.aap-libs:kafka:$aapLibsVersion")
     implementation("com.github.navikt.aap-libs:ktor-utils:$aapLibsVersion")
     implementation("com.github.navikt.aap-libs:ktor-auth-azuread:$aapLibsVersion")
-    implementation("com.github.navikt:aap-vedtak:1.0.102")
+    implementation("com.github.navikt:aap-vedtak:1.0.139")
 
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
