@@ -15,7 +15,7 @@ dependencies {
     implementation("com.github.navikt.aap-libs:kafka:$aapLibsVersion")
     implementation("com.github.navikt.aap-libs:ktor-utils:$aapLibsVersion")
     implementation("com.github.navikt.aap-libs:ktor-auth-azuread:$aapLibsVersion")
-    implementation("com.github.navikt:aap-vedtak:1.0.139")
+    implementation("com.github.navikt:aap-vedtak:1.0.205")
 
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
