@@ -2,12 +2,20 @@ package aap.bot.oppgavestyring
 
 import aap.bot.OppgavestyringConfig
 import aap.bot.http.HttpClientFactory
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import no.nav.aap.ktor.client.AzureAdTokenProvider
 import no.nav.aap.ktor.client.AzureConfig
+import org.slf4j.LoggerFactory
+
+private val secureLog = LoggerFactory.getLogger("secureLog")
 
 internal class OppgavestyringClient(
     private val oppgavestyring: OppgavestyringConfig,
@@ -106,8 +114,30 @@ internal class TokenProvider(
     private val oppgavestyring: OppgavestyringConfig,
     azure: AzureConfig,
 ) {
-    private val tokenProvider = AzureAdTokenProvider(azure, oppgavestyring.scope)
+
+    private val tokenProvider = AzureAdTokenProvider(
+        config = azure,
+        scope = oppgavestyring.scope,
+        client = client,
+    )
 
     internal suspend fun getAccessToken(bruker: Testbruker): String =
         tokenProvider.getUsernamePasswordToken(bruker.epost, oppgavestyring.testbrukerPassord)
+
+    companion object {
+        private val client = HttpClient(CIO) {
+            install(ContentNegotiation) {
+                jackson {
+                    registerModule(JavaTimeModule())
+                    disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                }
+            }
+            install(Logging) {
+                level = LogLevel.ALL
+                logger = object : Logger {
+                    override fun log(message: String) = secureLog.info(message)
+                }
+            }
+        }
+    }
 }
