@@ -21,6 +21,7 @@ data class Løsninger(
     val data: Any
 ) {
     companion object {
+        // TODO: Skal vi bare svarer på 11_2 dersom LovMe svarer UAVKLART, eller kan man ALLTID svare JA
         fun inngangsvilkår(vurdertAv: String) = listOf(
             Løsninger(
                 path = "losning/inngangsvilkar",
@@ -92,7 +93,7 @@ data class Løsninger(
                     tidspunktForVurdering = LocalDateTime.now(),
                     bestemmesAv = "soknadstidspunkt",
                     unntak = "unntak",
-                    unntaksbegrunnelse = "unntaksbegrunnelse",
+                    unntaksbegrunnelse = "NAV har gitt mangelfulle eller misvisende opplysninger",
                     manueltSattVirkningsdato = LocalDate.now(),
                 )
             )

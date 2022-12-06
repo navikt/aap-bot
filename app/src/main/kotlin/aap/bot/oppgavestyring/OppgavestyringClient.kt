@@ -18,18 +18,19 @@ internal class OppgavestyringClient(
 
     /**
      * Sendes inn først
+     * SAKSBEHANDLER (NAY)
      */
     suspend fun løsningInngangsvilkår(
         personident: String,
         bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR,
     ) {
-        Løsninger.inngangsvilkår(bruker.ident).forEach { (path, løsning) ->
-            send(personident, path, bruker, løsning)
-        }
+        val inngangsvilkår = Løsninger.inngangsvilkår(bruker.ident).single()
+        send(personident, inngangsvilkår.path, bruker, inngangsvilkår.data)
     }
 
     /**
      * Etter inngangsvilkår
+     * VEILEDER
      */
     suspend fun løsningLokalkontor(
         personident: String,
@@ -42,6 +43,7 @@ internal class OppgavestyringClient(
 
     /**
      * Etter løsning lokalkontor
+     * BESLUTTER
      */
     suspend fun kvalitetssikreLokalkontor(
         personident: String,
@@ -54,6 +56,7 @@ internal class OppgavestyringClient(
 
     /**
      * Etter kvalitetssikring lokalkontor
+     * SAKSBEHANDLER (NAY)
      */
     suspend fun løsningNAY(
         personident: String,
@@ -95,6 +98,8 @@ internal class OppgavestyringClient(
         }
         require(response.status == HttpStatusCode.OK)
     }
+
+    // todo: sende inn meldeplikt
 }
 
 internal class TokenProvider(
