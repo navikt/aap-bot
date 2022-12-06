@@ -3,9 +3,9 @@ package aap.bot.streams
 import aap.bot.devtools.DevtoolsClient
 import aap.bot.dolly.DollyClient
 import aap.bot.oppgavestyring.OppgavestyringClient
-import aap.bot.streams.søknad.SøknadDto
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.dto.kafka.SøkereKafkaDto
+import no.nav.aap.dto.kafka.SøknadKafkaDto
 import no.nav.aap.kafka.streams.extension.consume
 import no.nav.aap.kafka.streams.extension.filterNotNull
 import no.nav.aap.kafka.streams.extension.produce
@@ -19,7 +19,7 @@ internal fun topology(
     oppgavestyring: OppgavestyringClient,
     devtools: DevtoolsClient,
     dolly: DollyClient,
-    søknadProducer: Producer<String, SøknadDto>,
+    søknadProducer: Producer<String, SøknadKafkaDto>,
 ): Topology {
 
     val streams = StreamsBuilder()

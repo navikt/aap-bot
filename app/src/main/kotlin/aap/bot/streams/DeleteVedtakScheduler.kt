@@ -4,8 +4,10 @@ import aap.bot.devtools.DevtoolsClient
 import aap.bot.dolly.DollyClient
 import aap.bot.dolly.Gruppe
 import aap.bot.produce
-import aap.bot.streams.søknad.SøknadDto
 import kotlinx.coroutines.runBlocking
+import no.nav.aap.dto.kafka.Medlemskap
+import no.nav.aap.dto.kafka.Studier
+import no.nav.aap.dto.kafka.SøknadKafkaDto
 import no.nav.aap.kafka.streams.Table
 import no.nav.aap.kafka.streams.named
 import org.apache.kafka.clients.producer.Producer
@@ -17,6 +19,7 @@ import org.apache.kafka.streams.processor.api.ProcessorSupplier
 import org.apache.kafka.streams.processor.api.Record
 import org.apache.kafka.streams.state.KeyValueStore
 import org.apache.kafka.streams.state.ValueAndTimestamp
+import java.time.LocalDateTime
 import kotlin.time.Duration
 import kotlin.time.toJavaDuration
 
@@ -25,7 +28,7 @@ private class VedtakCleaner<V>(
     private val interval: Duration,
     private val devtools: DevtoolsClient,
     private val dolly: DollyClient,
-    private val søknadProducer: Producer<String, SøknadDto>,
+    private val søknadProducer: Producer<String, SøknadKafkaDto>,
     private val predicate: (value: ValueAndTimestamp<V>, now: Long) -> Boolean,
 ) : Processor<String, V, Void, Void> {
 
@@ -50,7 +53,32 @@ private class VedtakCleaner<V>(
                                     søknadProducer.produce(
                                         Topics.søknad,
                                         person.fødselsnummer,
-                                        SøknadDto(person.fødselsdato)
+                                        SøknadKafkaDto(
+                                            sykepenger = true,
+                                            ferie = null,
+                                            studier = Studier(
+                                                erStudent = null,
+                                                kommeTilbake = null,
+                                                vedlegg = emptyList(),
+                                            ),
+                                            medlemsskap = Medlemskap(
+                                                boddINorgeSammenhengendeSiste5 = true,
+                                                jobbetUtenforNorgeFørSyk = null,
+                                                jobbetSammenhengendeINorgeSiste5 = null,
+                                                iTilleggArbeidUtenforNorge = null,
+                                                utenlandsopphold = emptyList(),
+                                            ),
+                                            registrerteBehandlere = emptyList(),
+                                            andreBehandlere = emptyList(),
+                                            yrkesskadeType = SøknadKafkaDto.Yrkesskade.NEI,
+                                            utbetalinger = null,
+                                            tilleggsopplysninger = null,
+                                            registrerteBarn = emptyList(),
+                                            andreBarn = emptyList(),
+                                            vedlegg = emptyList(),
+                                            fødselsdato = person.fødselsdato,
+                                            innsendingTidspunkt = LocalDateTime.now(),
+                                        )
                                     )
                                 }
                         }
@@ -66,7 +94,7 @@ internal fun <V> KTable<String, V>.scheduleResøkAAP(
     interval: Duration,
     devtools: DevtoolsClient,
     dolly: DollyClient,
-    søknadProducer: Producer<String, SøknadDto>,
+    søknadProducer: Producer<String, SøknadKafkaDto>,
     predicate: (value: ValueAndTimestamp<V>, now: Long) -> Boolean,
 ) = toStream().process(
     ProcessorSupplier { VedtakCleaner(table, interval, devtools, dolly, søknadProducer, predicate) },

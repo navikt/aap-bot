@@ -5,7 +5,6 @@ import aap.bot.dolly.DollyClient
 import aap.bot.dolly.Gruppe
 import aap.bot.oppgavestyring.OppgavestyringClient
 import aap.bot.streams.Topics
-import aap.bot.streams.søknad.SøknadDto
 import aap.bot.streams.topology
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -18,6 +17,9 @@ import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.aap.dto.kafka.Medlemskap
+import no.nav.aap.dto.kafka.Studier
+import no.nav.aap.dto.kafka.SøknadKafkaDto
 import no.nav.aap.kafka.streams.KStreams
 import no.nav.aap.kafka.streams.KafkaStreams
 import no.nav.aap.kafka.streams.Topic
@@ -26,6 +28,7 @@ import no.nav.aap.ktor.config.loadConfig
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 fun main() {
     embeddedServer(Netty, port = 8080, module = Application::bot).start(wait = true)
@@ -65,12 +68,38 @@ fun Application.bot(kafka: KStreams = KafkaStreams) {
 
 private fun Application.produceAsync(
     dolly: DollyClient,
-    søknadProducer: Producer<String, SøknadDto>
+    søknadProducer: Producer<String, SøknadKafkaDto>
 ) {
     launch {
         dolly.hentBrukere(Gruppe.AAP_HAPPY_BOT).forEach { person ->
             val personident = person.fødselsnummer
-            søknadProducer.produce(Topics.søknad, personident, SøknadDto(person.fødselsdato))
+            val søknad = SøknadKafkaDto(
+                sykepenger = true,
+                ferie = null,
+                studier = Studier(
+                    erStudent = null,
+                    kommeTilbake = null,
+                    vedlegg = emptyList(),
+                ),
+                medlemsskap = Medlemskap(
+                    boddINorgeSammenhengendeSiste5 = true,
+                    jobbetUtenforNorgeFørSyk = null,
+                    jobbetSammenhengendeINorgeSiste5 = null,
+                    iTilleggArbeidUtenforNorge = null,
+                    utenlandsopphold = emptyList(),
+                ),
+                registrerteBehandlere = emptyList(),
+                andreBehandlere = emptyList(),
+                yrkesskadeType = SøknadKafkaDto.Yrkesskade.NEI,
+                utbetalinger = null,
+                tilleggsopplysninger = null,
+                registrerteBarn = emptyList(),
+                andreBarn = emptyList(),
+                vedlegg = emptyList(),
+                fødselsdato = person.fødselsdato,
+                innsendingTidspunkt = LocalDateTime.now(),
+            )
+            søknadProducer.produce(Topics.søknad, personident, søknad)
             delay(10_000)
         }
     }
