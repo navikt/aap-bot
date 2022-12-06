@@ -1,19 +1,19 @@
 package aap.bot.oppgavestyring
 
-import no.nav.aap.dto.kafka.Løsning_11_19_manuell
-import no.nav.aap.dto.kafka.Løsning_11_2_manuell
-import no.nav.aap.dto.kafka.Løsning_11_3_manuell
-import no.nav.aap.dto.kafka.Løsning_11_4_ledd2_ledd3_manuell
-import no.nav.aap.dto.kafka.Løsning_11_5_manuell
-import no.nav.aap.dto.kafka.Løsning_11_6_manuell
-import no.nav.aap.dto.kafka.Løsning_22_13_manuell
+import no.nav.aap.dto.kafka.Løsning_11_19_manuellKafkaDto
+import no.nav.aap.dto.kafka.Løsning_11_2_manuellKafkaDto
+import no.nav.aap.dto.kafka.Løsning_11_3_manuellKafkaDto
+import no.nav.aap.dto.kafka.Løsning_11_4_ledd2_ledd3_manuellKafkaDto
+import no.nav.aap.dto.kafka.Løsning_11_5_manuellKafkaDto
+import no.nav.aap.dto.kafka.Løsning_11_6_manuellKafkaDto
+import no.nav.aap.dto.kafka.Løsning_22_13_manuellKafkaDto
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class Inngangsvilkår(
-    val løsning_11_2: Løsning_11_2_manuell,
-    val løsning_11_3: Løsning_11_3_manuell,
-    val løsning_11_4: Løsning_11_4_ledd2_ledd3_manuell,
+    val løsning_11_2: Løsning_11_2_manuellKafkaDto,
+    val løsning_11_3: Løsning_11_3_manuellKafkaDto,
+    val løsning_11_4: Løsning_11_4_ledd2_ledd3_manuellKafkaDto,
 )
 
 data class Løsninger(
@@ -26,17 +26,17 @@ data class Løsninger(
             Løsninger(
                 path = "losning/inngangsvilkar",
                 data = Inngangsvilkår(
-                    løsning_11_2 = Løsning_11_2_manuell(
+                    løsning_11_2 = Løsning_11_2_manuellKafkaDto(
                         vurdertAv = vurdertAv,
                         tidspunktForVurdering = LocalDateTime.now(),
                         erMedlem = "JA",
                     ),
-                    løsning_11_3 = Løsning_11_3_manuell(
+                    løsning_11_3 = Løsning_11_3_manuellKafkaDto(
                         vurdertAv = vurdertAv,
                         tidspunktForVurdering = LocalDateTime.now(),
                         erOppfylt = true,
                     ),
-                    løsning_11_4 = Løsning_11_4_ledd2_ledd3_manuell(
+                    løsning_11_4 = Løsning_11_4_ledd2_ledd3_manuellKafkaDto(
                         vurdertAv = vurdertAv,
                         tidspunktForVurdering = LocalDateTime.now(),
                         erOppfylt = true,
@@ -48,21 +48,27 @@ data class Løsninger(
         fun fraLokalkontor(vurdertAv: String) = listOf(
             Løsninger(
                 path = "losning/paragraf_11_5",
-                data = Løsning_11_5_manuell(
+                data = Løsning_11_5_manuellKafkaDto(
                     vurdertAv = vurdertAv,
                     tidspunktForVurdering = LocalDateTime.now(),
                     kravOmNedsattArbeidsevneErOppfylt = true,
                     nedsettelseSkyldesSykdomEllerSkade = true,
+                    kilder = listOf(),
+                    legeerklæringDato = null,
+                    sykmeldingDato = null,
+                    kravOmNedsattArbeidsevneErOppfyltBegrunnelse = "fritekst",
+                    nedsettelseSkyldesSykdomEllerSkadeBegrunnelse = "fritekst"
                 )
             ),
             Løsninger(
                 path = "innstilling/paragraf_11_6",
-                data = Løsning_11_6_manuell(
+                data = Løsning_11_6_manuellKafkaDto(
                     vurdertAv = vurdertAv,
                     tidspunktForVurdering = LocalDateTime.now(),
                     harBehovForBehandling = true,
                     harBehovForTiltak = true,
                     harMulighetForÅKommeIArbeid = true,
+                    individuellBegrunnelse = null,
                 )
             )
         )
@@ -70,17 +76,18 @@ data class Løsninger(
         fun resten(vurdertAv: String) = listOf(
             Løsninger(
                 path = "losning/paragraf_11_6",
-                data = Løsning_11_6_manuell(
+                data = Løsning_11_6_manuellKafkaDto(
                     vurdertAv = vurdertAv,
                     tidspunktForVurdering = LocalDateTime.now(),
                     harBehovForBehandling = true,
                     harBehovForTiltak = true,
                     harMulighetForÅKommeIArbeid = true,
+                    individuellBegrunnelse = null,
                 )
             ),
             Løsninger(
                 path = "losning/paragraf_11_19",
-                data = Løsning_11_19_manuell(
+                data = Løsning_11_19_manuellKafkaDto(
                     vurdertAv = vurdertAv,
                     tidspunktForVurdering = LocalDateTime.now(),
                     beregningsdato = LocalDate.now(),
@@ -88,7 +95,7 @@ data class Løsninger(
             ),
             Løsninger(
                 path = "losning/paragraf_22_13",
-                data = Løsning_22_13_manuell(
+                data = Løsning_22_13_manuellKafkaDto(
                     vurdertAv = vurdertAv,
                     tidspunktForVurdering = LocalDateTime.now(),
                     bestemmesAv = "soknadstidspunkt",
