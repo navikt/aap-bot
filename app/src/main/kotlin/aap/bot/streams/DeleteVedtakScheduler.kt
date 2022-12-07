@@ -4,9 +4,8 @@ import aap.bot.devtools.DevtoolsClient
 import aap.bot.dolly.DollyClient
 import aap.bot.dolly.Gruppe
 import aap.bot.produce
+import aap.bot.søknad.Søknader
 import kotlinx.coroutines.runBlocking
-import no.nav.aap.dto.kafka.Medlemskap
-import no.nav.aap.dto.kafka.Studier
 import no.nav.aap.dto.kafka.SøknadKafkaDto
 import no.nav.aap.kafka.streams.Table
 import no.nav.aap.kafka.streams.named
@@ -19,7 +18,6 @@ import org.apache.kafka.streams.processor.api.ProcessorSupplier
 import org.apache.kafka.streams.processor.api.Record
 import org.apache.kafka.streams.state.KeyValueStore
 import org.apache.kafka.streams.state.ValueAndTimestamp
-import java.time.LocalDateTime
 import kotlin.time.Duration
 import kotlin.time.toJavaDuration
 
@@ -51,34 +49,9 @@ private class VedtakCleaner<V>(
                                 .firstOrNull { it.fødselsnummer == record.key }
                                 ?.let { person ->
                                     søknadProducer.produce(
-                                        Topics.søknad,
-                                        person.fødselsnummer,
-                                        SøknadKafkaDto(
-                                            sykepenger = true,
-                                            ferie = null,
-                                            studier = Studier(
-                                                erStudent = null,
-                                                kommeTilbake = null,
-                                                vedlegg = emptyList(),
-                                            ),
-                                            medlemsskap = Medlemskap(
-                                                boddINorgeSammenhengendeSiste5 = true,
-                                                jobbetUtenforNorgeFørSyk = null,
-                                                jobbetSammenhengendeINorgeSiste5 = null,
-                                                iTilleggArbeidUtenforNorge = null,
-                                                utenlandsopphold = emptyList(),
-                                            ),
-                                            registrerteBehandlere = emptyList(),
-                                            andreBehandlere = emptyList(),
-                                            yrkesskadeType = SøknadKafkaDto.Yrkesskade.NEI,
-                                            utbetalinger = null,
-                                            tilleggsopplysninger = null,
-                                            registrerteBarn = emptyList(),
-                                            andreBarn = emptyList(),
-                                            vedlegg = emptyList(),
-                                            fødselsdato = person.fødselsdato,
-                                            innsendingTidspunkt = LocalDateTime.now(),
-                                        )
+                                        topic = Topics.søknad,
+                                        key = person.fødselsnummer,
+                                        value = Søknader.generell(person.fødselsdato)
                                     )
                                 }
                         }

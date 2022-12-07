@@ -2,20 +2,12 @@ package aap.bot.oppgavestyring
 
 import aap.bot.OppgavestyringConfig
 import aap.bot.http.HttpClientFactory
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.jackson.*
 import no.nav.aap.ktor.client.AzureAdTokenProvider
 import no.nav.aap.ktor.client.AzureConfig
-import org.slf4j.LoggerFactory
-
-private val secureLog = LoggerFactory.getLogger("secureLog")
 
 internal class OppgavestyringClient(
     private val oppgavestyring: OppgavestyringConfig,
@@ -26,11 +18,10 @@ internal class OppgavestyringClient(
 
     /**
      * Sendes inn først
-     * SAKSBEHANDLER (NAY)
      */
     suspend fun løsningInngangsvilkår(
         personident: String,
-        bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR,
+        bruker: Testbruker = Testbruker.SAKSBEHANDLER,
     ) {
         val inngangsvilkår = Løsninger.inngangsvilkår(bruker.ident).single()
         send(personident, inngangsvilkår.path, bruker, inngangsvilkår.data)
@@ -38,11 +29,10 @@ internal class OppgavestyringClient(
 
     /**
      * Etter inngangsvilkår
-     * VEILEDER
      */
     suspend fun løsningLokalkontor(
         personident: String,
-        bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR,
+        bruker: Testbruker = Testbruker.VEILEDER_GAMLEOSLO_NAVKONTOR,
     ) {
         Løsninger.fraLokalkontor(bruker.ident).forEach { (path, løsning) ->
             send(personident, path, bruker, løsning)
@@ -51,11 +41,10 @@ internal class OppgavestyringClient(
 
     /**
      * Etter løsning lokalkontor
-     * BESLUTTER
      */
     suspend fun kvalitetssikreLokalkontor(
         personident: String,
-        bruker: Testbruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR,
+        bruker: Testbruker = Testbruker.FATTER,
     ) {
         Kvalitetssikringer.lokalkontor(bruker).forEach { (path, kvalitetssikring) ->
             send(personident, path, bruker, kvalitetssikring)
@@ -64,11 +53,10 @@ internal class OppgavestyringClient(
 
     /**
      * Etter kvalitetssikring lokalkontor
-     * SAKSBEHANDLER (NAY)
      */
     suspend fun løsningNAY(
         personident: String,
-        bruker: Testbruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR,
+        bruker: Testbruker = Testbruker.SAKSBEHANDLER,
     ) {
         Løsninger.resten(bruker.ident).forEach { (path, løsning) ->
             send(personident, path, bruker, løsning)
@@ -80,7 +68,7 @@ internal class OppgavestyringClient(
      */
     suspend fun kvalitetssikreNAY(
         personident: String,
-        bruker: Testbruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR,
+        bruker: Testbruker = Testbruker.BESLUTTER,
     ) {
         Kvalitetssikringer.nay(bruker).forEach { (path, kvalitetssikring) ->
             send(personident, path, bruker, kvalitetssikring)
@@ -93,7 +81,7 @@ internal class OppgavestyringClient(
     suspend fun iverksett(personident: String) {
         val response = httpClient.post("${oppgavestyring.host}/sak/$personident/iverksett") {
             contentType(ContentType.Application.Json)
-            bearerAuth(tokenProvider.getAccessToken(Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR))
+            bearerAuth(tokenProvider.getAccessToken(Testbruker.BESLUTTER))
         }
         require(response.status == HttpStatusCode.OK)
     }
@@ -118,26 +106,9 @@ internal class TokenProvider(
     private val tokenProvider = AzureAdTokenProvider(
         config = azure,
         scope = oppgavestyring.scope,
-        client = client,
+        client = HttpClientFactory.create(LogLevel.ALL),
     )
 
     internal suspend fun getAccessToken(bruker: Testbruker): String =
         tokenProvider.getUsernamePasswordToken(bruker.epost, oppgavestyring.testbrukerPassord)
-
-    companion object {
-        private val client = HttpClient(CIO) {
-            install(ContentNegotiation) {
-                jackson {
-                    registerModule(JavaTimeModule())
-                    disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                }
-            }
-            install(Logging) {
-                level = LogLevel.ALL
-                logger = object : Logger {
-                    override fun log(message: String) = secureLog.info(message)
-                }
-            }
-        }
-    }
 }
