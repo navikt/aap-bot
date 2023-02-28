@@ -5,8 +5,7 @@ metadata:
   namespace: aap
   labels:
     team: aap
-  annotations:
-    github.url: "https://github.com/navikt/aap-bot"
+    sub: vedtak
 spec:
   image: {{image}}
   kafka:
@@ -36,7 +35,7 @@ spec:
       memory: 500Mi
     requests:
       cpu: 500m
-      memory: 500Mi
+      memory: 1Gi
   liveness:
     path: /actuator/live
     initialDelay: 1

@@ -12,10 +12,9 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
-import no.nav.aap.kafka.streams.test.KafkaStreamsMock
+import no.nav.aap.kafka.streams.v2.test.KStreamsMock
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import kotlin.test.assertTrue
 
 class AppTest {
 
@@ -31,17 +30,12 @@ class AppTest {
         }
     }
 
-    @Test
-    fun test() {
-        // github actions trenger minst en test for å gå igjennom
-        assertTrue(true)
-    }
 }
 
 private class Mocks : AutoCloseable {
     private val oAuth2 = embeddedServer(Netty, port = 0, module = Application::azureAdMock).apply { start() }
 
-    val kafka = KafkaStreamsMock()
+    val kafka = KStreamsMock()
 
     companion object {
         val NettyApplicationEngine.port get() = runBlocking { resolvedConnectors() }.first { it.type == ConnectorType.HTTP }.port

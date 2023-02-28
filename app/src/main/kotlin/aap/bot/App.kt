@@ -19,10 +19,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.aap.dto.kafka.SøknadKafkaDto
-import no.nav.aap.kafka.streams.KStreams
-import no.nav.aap.kafka.streams.KafkaStreams
-import no.nav.aap.kafka.streams.Topic
-import no.nav.aap.kafka.vanilla.KafkaConfig
+import no.nav.aap.kafka.streams.v2.KStreams
+import no.nav.aap.kafka.streams.v2.KafkaStreams
+import no.nav.aap.kafka.streams.v2.Topic
 import no.nav.aap.ktor.config.loadConfig
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -34,14 +33,14 @@ fun main() {
 
 val secureLog = LoggerFactory.getLogger("secureLog")
 
-fun Application.bot(kafka: KStreams = KafkaStreams) {
+fun Application.bot(kafka: KStreams = KafkaStreams()) {
     Thread.currentThread().setUncaughtExceptionHandler { _, e -> log.error("Uhåndtert feil", e) }
 
     val prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     install(MicrometerMetrics) { registry = prometheus }
 
     val config = loadConfig<Config>()
-    val søknadProducer = kafka.createProducer(KafkaConfig.copyFrom(config.kafka), Topics.søknad)
+    val søknadProducer = kafka.createProducer(config.kafka, Topics.søknad)
     val oppgavestyring = OppgavestyringClient(config.oppgavestyring, config.azure)
     val dolly = DollyClient(config.dolly, config.azure)
     val devtools = DevtoolsClient(config.devtools)
@@ -51,7 +50,11 @@ fun Application.bot(kafka: KStreams = KafkaStreams) {
         søknadProducer.close()
     }
 
-    kafka.connect(config.kafka, prometheus, topology(oppgavestyring, devtools, dolly, søknadProducer))
+    kafka.connect(
+        config = config.kafka,
+        registry = prometheus,
+        topology = topology(oppgavestyring, devtools, dolly, søknadProducer)
+    )
 
     produceAsync(dolly, søknadProducer)
 

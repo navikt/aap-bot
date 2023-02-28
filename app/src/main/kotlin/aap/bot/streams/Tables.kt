@@ -1,7 +1,7 @@
 package aap.bot.streams
 
-import no.nav.aap.kafka.streams.Table
+import no.nav.aap.kafka.streams.v2.Table
 
 object Tables {
-    val vedtak = Table("vedtak", Topics.vedtak)
+    val vedtak = Table(Topics.vedtak)
 }

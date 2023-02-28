@@ -6,13 +6,9 @@ import aap.bot.oppgavestyring.OppgavestyringClient
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.dto.kafka.SøkereKafkaDto
 import no.nav.aap.dto.kafka.SøknadKafkaDto
-import no.nav.aap.kafka.streams.extension.consume
-import no.nav.aap.kafka.streams.extension.filterNotNull
-import no.nav.aap.kafka.streams.extension.produce
+import no.nav.aap.kafka.streams.v2.Topology
+import no.nav.aap.kafka.streams.v2.topology
 import org.apache.kafka.clients.producer.Producer
-import org.apache.kafka.streams.StreamsBuilder
-import org.apache.kafka.streams.Topology
-import org.apache.kafka.streams.kstream.Branched
 import kotlin.time.Duration.Companion.seconds
 
 internal fun topology(
@@ -20,55 +16,75 @@ internal fun topology(
     devtools: DevtoolsClient,
     dolly: DollyClient,
     søknadProducer: Producer<String, SøknadKafkaDto>,
-): Topology {
+): Topology = topology {
+    consume(Topics.søkere)
+        .branch(TRENGER_INNGANGSVILKÅR) {
+            it.forEach { personident, _ ->
+                runBlocking {
+                    oppgavestyring.løsningInngangsvilkår(personident)
+                }
+            }
+        }
+        .branch(TRENGER_LØSNING_LOKALKONTOR) {
+            it.forEach { personident, _ ->
+                runBlocking {
+                    oppgavestyring.løsningLokalkontor(personident)
+                }
+            }
+        }
+        .branch(TRENGER_KVALITETSSIKRING_LOKALKONTOR) {
+            it.forEach { personident, _ ->
+                runBlocking {
+                    oppgavestyring.kvalitetssikreLokalkontor(personident)
+                }
+            }
+        }
+        .branch(TRENGER_LØSNING_NAY) {
+            it.forEach { personident, _ ->
+                runBlocking {
+                    oppgavestyring.løsningNAY(personident)
+                }
+            }
+        }
+        .branch(TRENGER_KVALITETSSIKRING_NAY) {
+            it.forEach { personident, _ ->
+                runBlocking {
+                    oppgavestyring.kvalitetssikreNAY(personident)
+                }
+            }
 
-    val streams = StreamsBuilder()
+        }
+        .branch(SKAL_IVERKSETTES) {
+            it.forEach { personident, _ ->
+                runBlocking {
+                    oppgavestyring.iverksett(personident)
+                }
+            }
+        }
 
-    streams.consume(Topics.søkere)
-        .filterNotNull("filter-sokere-tombstone")
-        .split()
-        .branch(TRENGER_INNGANGSVILKÅR, sendInngangsvilkår(oppgavestyring))
-        .branch(TRENGER_LØSNING_LOKALKONTOR, sendLøsningLokalkontor(oppgavestyring))
-        .branch(TRENGER_KVALITETSSIKRING_LOKALKONTOR, kvalitetssikreLokalkontor(oppgavestyring))
-        .branch(TRENGER_LØSNING_NAY, sendLøsningNAY(oppgavestyring))
-        .branch(TRENGER_KVALITETSSIKRING_NAY, kvalitetssikreNAY(oppgavestyring))
-        .branch(SKAL_IVERKSETTES, iverksett(oppgavestyring))
+    val vedtakTable = consume(Topics.vedtak).produce(Tables.vedtak)
 
-    val vedtakTable = streams.consume(Topics.vedtak).produce(Tables.vedtak)
-
-    vedtakTable.scheduleResøkAAP(
-        table = Tables.vedtak,
-        interval = 10.seconds,
-        devtools = devtools,
-        dolly = dolly,
-        søknadProducer = søknadProducer
-    ) { record, now ->
-        // evict 10s or older records
-        record.timestamp() + 10_000 > now
-    }
-
-    return streams.build()
+    vedtakTable.schedule(
+        VedtakStateStoreCleaner(
+            ktable = vedtakTable,
+            interval = 10.seconds,
+            devtools = devtools,
+            dolly = dolly,
+            søknadProducer = søknadProducer,
+        )
+    )
 }
 
 /**
  * 11-2 og 11-4 kan være løst automatisk, trenger bare sjekke 11-3
  */
-private val TRENGER_INNGANGSVILKÅR = { _: String, dto: SøkereKafkaDto ->
+private val TRENGER_INNGANGSVILKÅR = { dto: SøkereKafkaDto ->
     dto.saker.any { sak ->
         sak.sakstyper.first { it.aktiv }.paragraf_11_3?.tilstand == AVVENTER_MANUELL_VURDERING
     }
 }
 
-private fun sendInngangsvilkår(client: OppgavestyringClient) =
-    Branched.withConsumer<String, SøkereKafkaDto> { branch ->
-        branch.foreach { personident, _ ->
-            runBlocking {
-                client.løsningInngangsvilkår(personident)
-            }
-        }
-    }
-
-private val TRENGER_LØSNING_LOKALKONTOR = { _: String, dto: SøkereKafkaDto ->
+private val TRENGER_LØSNING_LOKALKONTOR = { dto: SøkereKafkaDto ->
     dto.saker.any { sak ->
         sak.sakstyper.first { it.aktiv }.let { aktiv ->
             aktiv.paragraf_11_5?.tilstand == AVVENTER_MANUELL_VURDERING ||
@@ -77,16 +93,7 @@ private val TRENGER_LØSNING_LOKALKONTOR = { _: String, dto: SøkereKafkaDto ->
     }
 }
 
-private fun sendLøsningLokalkontor(client: OppgavestyringClient) =
-    Branched.withConsumer<String, SøkereKafkaDto> { branch ->
-        branch.foreach { personident, _ ->
-            runBlocking {
-                client.løsningLokalkontor(personident)
-            }
-        }
-    }
-
-private val TRENGER_KVALITETSSIKRING_LOKALKONTOR = { _: String, dto: SøkereKafkaDto ->
+private val TRENGER_KVALITETSSIKRING_LOKALKONTOR = { dto: SøkereKafkaDto ->
     dto.saker.any { sak ->
         sak.sakstyper.first { it.aktiv }
             .paragraf_11_5
@@ -94,16 +101,7 @@ private val TRENGER_KVALITETSSIKRING_LOKALKONTOR = { _: String, dto: SøkereKafk
     }
 }
 
-private fun kvalitetssikreLokalkontor(client: OppgavestyringClient) =
-    Branched.withConsumer<String, SøkereKafkaDto> { branch ->
-        branch.foreach { personident, _ ->
-            runBlocking {
-                client.kvalitetssikreLokalkontor(personident)
-            }
-        }
-    }
-
-private val TRENGER_LØSNING_NAY = { _: String, dto: SøkereKafkaDto ->
+private val TRENGER_LØSNING_NAY = { dto: SøkereKafkaDto ->
     dto.saker.any { sak ->
         val sakstype = sak.sakstyper.first { it.aktiv }
         sakstype.paragraf_11_6?.tilstand == AVVENTER_MANUELL_VURDERING ||
@@ -112,16 +110,7 @@ private val TRENGER_LØSNING_NAY = { _: String, dto: SøkereKafkaDto ->
     }
 }
 
-private fun sendLøsningNAY(client: OppgavestyringClient) =
-    Branched.withConsumer<String, SøkereKafkaDto> { branch ->
-        branch.foreach { personident, _ ->
-            runBlocking {
-                client.løsningNAY(personident)
-            }
-        }
-    }
-
-private val TRENGER_KVALITETSSIKRING_NAY = { _: String, dto: SøkereKafkaDto ->
+private val TRENGER_KVALITETSSIKRING_NAY = { dto: SøkereKafkaDto ->
     dto.saker.any { sak ->
         val sakstype = sak.sakstyper.first { it.aktiv }
         sakstype.paragraf_11_6?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING ||
@@ -130,25 +119,8 @@ private val TRENGER_KVALITETSSIKRING_NAY = { _: String, dto: SøkereKafkaDto ->
     }
 }
 
-private fun kvalitetssikreNAY(client: OppgavestyringClient) =
-    Branched.withConsumer<String, SøkereKafkaDto> { branch ->
-        branch.foreach { personident, _ ->
-            runBlocking {
-                client.kvalitetssikreNAY(personident)
-            }
-        }
-    }
-
-private val SKAL_IVERKSETTES = { _: String, dto: SøkereKafkaDto ->
+private val SKAL_IVERKSETTES = { dto: SøkereKafkaDto ->
     dto.saker.any { sak -> sak.tilstand == VEDTAK_FATTET }
-}
-
-private fun iverksett(client: OppgavestyringClient) = Branched.withConsumer<String, SøkereKafkaDto> { branch ->
-    branch.foreach { personident, _ ->
-        runBlocking {
-            client.iverksett(personident)
-        }
-    }
 }
 
 // tilstand på vilkår

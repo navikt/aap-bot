@@ -8,14 +8,15 @@ repositories {
     maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
 }
 
-val aapLibsVersion = "3.6.18"
+val aapLibsVersion = "3.6.20"
 val ktorVersion = "2.2.3"
 
 dependencies {
-    implementation("com.github.navikt.aap-libs:kafka:$aapLibsVersion")
+    implementation("com.github.navikt.aap-libs:kafka-2:$aapLibsVersion")
     implementation("com.github.navikt.aap-libs:ktor-utils:$aapLibsVersion")
     implementation("com.github.navikt.aap-libs:ktor-auth-azuread:$aapLibsVersion")
     implementation("com.github.navikt.aap-vedtak:kafka-dto:1.1.1")
+    implementation("org.apache.kafka:kafka-clients:3.3.1")
 
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
@@ -32,7 +33,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0")
 
     testImplementation(kotlin("test"))
-    testImplementation("com.github.navikt.aap-libs:kafka-test:$aapLibsVersion")
+    testImplementation("com.github.navikt.aap-libs:kafka-test-2:$aapLibsVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 }
 
