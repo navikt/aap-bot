@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.7.22"
-    id("io.ktor.plugin") version "2.1.3"
+    kotlin("jvm") version "1.8.10"
+    id("io.ktor.plugin") version "2.2.3"
 }
 
 repositories {
@@ -8,14 +8,14 @@ repositories {
     maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
 }
 
-val aapLibsVersion = "3.5.28"
-val ktorVersion = "2.1.3"
+val aapLibsVersion = "3.6.18"
+val ktorVersion = "2.2.3"
 
 dependencies {
     implementation("com.github.navikt.aap-libs:kafka:$aapLibsVersion")
     implementation("com.github.navikt.aap-libs:ktor-utils:$aapLibsVersion")
     implementation("com.github.navikt.aap-libs:ktor-auth-azuread:$aapLibsVersion")
-    implementation("com.github.navikt:aap-vedtak:1.0.247")
+    implementation("com.github.navikt.aap-vedtak:kafka-dto:1.1.1")
 
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
@@ -38,7 +38,7 @@ dependencies {
 
 tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "18"
+        kotlinOptions.jvmTarget = "19"
     }
 
     withType<Test> {

@@ -102,6 +102,7 @@ data class Løsninger(
                     unntak = "unntak",
                     unntaksbegrunnelse = "NAV har gitt mangelfulle eller misvisende opplysninger",
                     manueltSattVirkningsdato = LocalDate.now(),
+                    begrunnelseForAnnet = null
                 )
             )
         )
