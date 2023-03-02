@@ -1,10 +1,16 @@
 package aap.bot.dolly
 
 import aap.bot.http.HttpClientFactory
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import no.nav.aap.ktor.client.AzureAdTokenProvider
 import no.nav.aap.ktor.client.AzureConfig
 import org.slf4j.LoggerFactory
@@ -24,7 +30,31 @@ enum class Gruppe(val id: String) {
 }
 
 class DollyClient(private val dollyConfig: DollyConfig, azureConfig: AzureConfig) {
-    private val tokenProvider = AzureAdTokenProvider(azureConfig, dollyConfig.scope)
+    private val tokenProvider = AzureAdTokenProvider(
+        config = azureConfig,
+        scope = dollyConfig.scope,
+        client = HttpClient(CIO) {
+            install(ContentNegotiation) {
+                jackson {
+                    registerModule(JavaTimeModule())
+                    disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                }
+            }
+            install(Logging) {
+                level = LogLevel.BODY
+                logger = object : Logger {
+                    private var logBody = false
+                    override fun log(message: String) {
+                        when {
+                            message == "BODY START" -> logBody = true
+                            message == "BODY END" -> logBody = false
+                            logBody -> log.info("respons fra azuread: $message")
+                        }
+                    }
+                }
+            }
+        }
+    )
 
     private val httpClient = HttpClientFactory.create(LogLevel.ALL)
 
