@@ -41,15 +41,10 @@ class DollyClient(private val dollyConfig: DollyConfig, azureConfig: AzureConfig
                 }
             }
             install(Logging) {
-                level = LogLevel.BODY
+                level = LogLevel.ALL
                 logger = object : Logger {
-                    private var logBody = false
                     override fun log(message: String) {
-                        when {
-                            message == "BODY START" -> logBody = true
-                            message == "BODY END" -> logBody = false
-                            logBody -> log.info("respons fra azuread: $message")
-                        }
+                        log.info("respons fra azuread: $message")
                     }
                 }
             }
