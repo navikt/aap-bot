@@ -1,7 +1,6 @@
 package aap.bot.streams
 
 import aap.bot.devtools.DevtoolsClient
-import aap.bot.dolly.DollyClient
 import aap.bot.oppgavestyring.OppgavestyringClient
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.dto.kafka.SøkereKafkaDto
@@ -14,7 +13,6 @@ import kotlin.time.Duration.Companion.seconds
 internal fun topology(
     oppgavestyring: OppgavestyringClient,
     devtools: DevtoolsClient,
-    dolly: DollyClient,
     søknadProducer: Producer<String, SøknadKafkaDto>,
     testSøkere: List<String>,
 ): Topology = topology {
@@ -71,7 +69,6 @@ internal fun topology(
             ktable = vedtakTable,
             interval = 10.seconds,
             devtools = devtools,
-            dolly = dolly,
             søknadProducer = søknadProducer,
         )
     )

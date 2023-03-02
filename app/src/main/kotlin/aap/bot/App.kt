@@ -8,12 +8,10 @@ import aap.bot.oppgavestyring.OppgavestyringClient
 import aap.bot.streams.Topics
 import aap.bot.streams.topology
 import aap.bot.søknad.Søknader
-import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
-import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusConfig
@@ -35,14 +33,13 @@ fun main() {
     embeddedServer(Netty, port = 8080, module = Application::bot).start(wait = true)
 }
 
-val secureLog = LoggerFactory.getLogger("secureLog")
+internal val secureLog = LoggerFactory.getLogger("secureLog")
 
 fun Application.bot(kafka: KStreams = KafkaStreams()) {
     Thread.currentThread().setUncaughtExceptionHandler { _, e -> log.error("Uhåndtert feil", e) }
 
     val prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     install(MicrometerMetrics) { registry = prometheus }
-    install(ContentNegotiation) {jackson {  }}
 
     val config = loadConfig<Config>()
     val søknadProducer = kafka.createProducer(config.kafka, Topics.søknad)
@@ -67,7 +64,6 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
         topology = topology(
             oppgavestyring = oppgavestyring,
             devtools = devtools,
-            dolly = dolly,
             søknadProducer = søknadProducer,
             testSøkere = testSøkere.map(DollyResponsePerson::fødselsnummer)
         )
@@ -97,7 +93,7 @@ private fun Application.produceAsync(
     }
 }
 
-inline fun <reified V : Any> Producer<String, V>.produce(topic: Topic<V>, key: String, value: V) {
+internal inline fun <reified V : Any> Producer<String, V>.produce(topic: Topic<V>, key: String, value: V) {
     val record = ProducerRecord(topic.name, key, value)
     send(record).get().also {
         secureLog.trace(

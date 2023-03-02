@@ -2,8 +2,6 @@ package aap.bot
 
 import aap.bot.devtools.DevtoolsClient
 import aap.bot.devtools.DevtoolsConfig
-import aap.bot.dolly.DollyClient
-import aap.bot.dolly.DollyConfig
 import aap.bot.oppgavestyring.OppgavestyringClient
 import aap.bot.streams.topology
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
@@ -22,9 +20,7 @@ internal class DescribeTopology {
         val azureConfig = AzureConfig(URL("http://azure.mock"), "", "")
         val oppgavestyring = OppgavestyringClient(oppgavestyringConfig, azureConfig)
         val devtools = DevtoolsClient(DevtoolsConfig(URL("http://dev.tools")))
-        val dollyConfig = DollyConfig(URL("http://dolly.client"), "")
-        val dolly = DollyClient(dollyConfig, azureConfig)
-        val topology = topology(oppgavestyring, devtools, dolly, MockProducer(), listOf())
+        val topology = topology(oppgavestyring, devtools, MockProducer(), listOf())
 
         val kafka = KStreamsMock()
         kafka.connect(topology, StreamsConfig("", ""), SimpleMeterRegistry())
