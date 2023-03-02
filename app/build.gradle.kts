@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm") version "1.8.10"
-    id("io.ktor.plugin") version "2.2.3"
+    id("io.ktor.plugin") version "2.2.4"
 }
 
 repositories {
@@ -8,8 +8,8 @@ repositories {
     maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
 }
 
-val aapLibsVersion = "3.6.20"
-val ktorVersion = "2.2.3"
+val aapLibsVersion = "3.6.25"
+val ktorVersion = "2.2.4"
 
 dependencies {
     implementation("com.github.navikt.aap-libs:kafka-2:$aapLibsVersion")

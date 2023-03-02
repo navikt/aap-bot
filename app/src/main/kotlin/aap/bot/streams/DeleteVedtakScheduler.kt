@@ -13,7 +13,7 @@ import no.nav.aap.kafka.streams.v2.processor.state.StateScheduleProcessor
 import org.apache.kafka.clients.producer.Producer
 import kotlin.time.Duration
 
-internal class VedtakStateStoreCleaner<V>(
+internal class SøkPåNyttScheduler<V: Any>(
     ktable: KTable<V>,
     interval: Duration,
     private val devtools: DevtoolsClient,

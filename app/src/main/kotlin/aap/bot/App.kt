@@ -2,21 +2,25 @@ package aap.bot
 
 import aap.bot.devtools.DevtoolsClient
 import aap.bot.dolly.DollyClient
+import aap.bot.dolly.DollyResponsePerson
 import aap.bot.dolly.Gruppe
 import aap.bot.oppgavestyring.OppgavestyringClient
 import aap.bot.streams.Topics
 import aap.bot.streams.topology
 import aap.bot.søknad.Søknader
+import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.aap.dto.kafka.SøknadKafkaDto
 import no.nav.aap.kafka.streams.v2.KStreams
@@ -38,6 +42,7 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
 
     val prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     install(MicrometerMetrics) { registry = prometheus }
+    install(ContentNegotiation) {jackson {  }}
 
     val config = loadConfig<Config>()
     val søknadProducer = kafka.createProducer(config.kafka, Topics.søknad)
@@ -50,13 +55,24 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
         søknadProducer.close()
     }
 
+    val testSøkere = runBlocking {
+        dolly.hentBrukere(Gruppe.AAP_HAPPY_BOT)
+    }
+
+    produceAsync(testSøkere, søknadProducer)
+
     kafka.connect(
         config = config.kafka,
         registry = prometheus,
-        topology = topology(oppgavestyring, devtools, dolly, søknadProducer)
+        topology = topology(
+            oppgavestyring = oppgavestyring,
+            devtools = devtools,
+            dolly = dolly,
+            søknadProducer = søknadProducer,
+            testSøkere = testSøkere.map(DollyResponsePerson::fødselsnummer)
+        )
     )
 
-    produceAsync(dolly, søknadProducer)
 
     routing {
         route("/actuator") {
@@ -68,11 +84,11 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
 }
 
 private fun Application.produceAsync(
-    dolly: DollyClient,
+    testpersoner: List<DollyResponsePerson>,
     søknadProducer: Producer<String, SøknadKafkaDto>
 ) {
     launch {
-        dolly.hentBrukere(Gruppe.AAP_HAPPY_BOT).forEach { person ->
+        testpersoner.forEach { person ->
             val personident = person.fødselsnummer
             val søknad = Søknader.generell(person.fødselsdato)
             søknadProducer.produce(Topics.søknad, personident, søknad)

@@ -24,7 +24,7 @@ internal class DescribeTopology {
         val devtools = DevtoolsClient(DevtoolsConfig(URL("http://dev.tools")))
         val dollyConfig = DollyConfig(URL("http://dolly.client"), "")
         val dolly = DollyClient(dollyConfig, azureConfig)
-        val topology = topology(oppgavestyring, devtools, dolly, MockProducer())
+        val topology = topology(oppgavestyring, devtools, dolly, MockProducer(), listOf())
 
         val kafka = KStreamsMock()
         kafka.connect(topology, StreamsConfig("", ""), SimpleMeterRegistry())

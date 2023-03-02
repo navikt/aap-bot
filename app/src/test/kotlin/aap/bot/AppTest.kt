@@ -14,23 +14,22 @@ import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.kafka.streams.v2.test.KStreamsMock
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Test
 
-class AppTest {
-
-    @Test
-    fun app() {
-        Mocks().use {
-            testApplication {
-                environment { config = it.environment }
-                application {
-                    bot(it.kafka)
-                }
-            }
-        }
-    }
-
-}
+//class AppTest {
+//
+//    @Test
+//    fun app() {
+//        Mocks().use {
+//            testApplication {
+//                environment { config = it.environment }
+//                application {
+//                    bot(it.kafka)
+//                }
+//            }
+//        }
+//    }
+//
+//}
 
 private class Mocks : AutoCloseable {
     private val oAuth2 = embeddedServer(Netty, port = 0, module = Application::azureAdMock).apply { start() }

@@ -16,8 +16,10 @@ internal fun topology(
     devtools: DevtoolsClient,
     dolly: DollyClient,
     søknadProducer: Producer<String, SøknadKafkaDto>,
+    testSøkere: List<String>,
 ): Topology = topology {
     consume(Topics.søkere)
+        .filterKey { it in testSøkere }
         .branch(TRENGER_INNGANGSVILKÅR) {
             it.forEach { personident, _ ->
                 runBlocking {
@@ -65,7 +67,7 @@ internal fun topology(
     val vedtakTable = consume(Topics.vedtak).produce(Tables.vedtak)
 
     vedtakTable.schedule(
-        VedtakStateStoreCleaner(
+        SøkPåNyttScheduler(
             ktable = vedtakTable,
             interval = 10.seconds,
             devtools = devtools,
