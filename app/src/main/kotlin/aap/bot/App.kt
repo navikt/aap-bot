@@ -97,7 +97,7 @@ internal inline fun <reified V : Any> Producer<String, V>.produce(topic: Topic<V
     val record = ProducerRecord(topic.name, key, value)
     send(record).get().also {
         secureLog.trace(
-            "Sender inn søknad",
+            "Sender inn søknad {} {} {} {}",
             StructuredArguments.kv("key", record.key()),
             StructuredArguments.kv("topic", topic.name),
             StructuredArguments.kv("partition", it.partition()),
