@@ -53,7 +53,12 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
         devtools.getTestpersoner()
     }
 
-    produceAsync(testPersoner, søknadProducer)
+    launch {
+        testPersoner.forEach { søker ->
+            resetSøker(søker, devtools, søknadProducer)
+            delay(10_000)
+        }
+    }
 
     kafka.connect(
         config = config.kafka,
@@ -76,17 +81,15 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
     }
 }
 
-private fun Application.produceAsync(
-    testpersoner: List<TestPerson>,
+private suspend fun resetSøker(
+    person: TestPerson,
+    devtools: DevtoolsClient,
     søknadProducer: Producer<String, SøknadKafkaDto>
 ) {
-    launch {
-        testpersoner.forEach { person ->
-            val personident = person.fødselsnummer
-            val søknad = Søknader.generell(person.fødselsdato)
-            søknadProducer.produce(Topics.søknad, personident, søknad)
-            delay(10_000)
-        }
+    if (devtools.delete(person.fødselsnummer)) {
+        val personident = person.fødselsnummer
+        val søknad = Søknader.generell(person.fødselsdato)
+        søknadProducer.produce(Topics.søknad, personident, søknad)
     }
 }
 

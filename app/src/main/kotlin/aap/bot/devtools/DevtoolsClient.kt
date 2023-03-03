@@ -16,14 +16,14 @@ data class DevtoolsConfig(
 internal class DevtoolsClient(private val config: DevtoolsConfig) {
     private val httpClient: HttpClient = HttpClientFactory.create(LogLevel.ALL)
 
-    suspend fun delete(personident: String) {
+    suspend fun delete(personident: String): Boolean {
         val response = httpClient.delete("${config.host}/$personident") {
             contentType(ContentType.Application.Json)
         }
         val statuses = response.body<List<TombstoneStatus>>()
 
         require(response.status == HttpStatusCode.OK) { "Feil http status fra devtools: ${response.status}" }
-        require(statuses.all { it.deleted }) { "Ikke alle topics ble tombstona: $statuses" }
+        return statuses.all { it.deleted }
     }
 
     suspend fun getTestpersoner(): List<TestPerson> {

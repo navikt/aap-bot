@@ -13,7 +13,7 @@ import java.time.LocalDate
 import kotlin.random.Random
 import kotlin.time.Duration
 
-internal class SøkPåNyttScheduler<V: Any>(
+internal class SøkPåNyttScheduler<V : Any>(
     ktable: KTable<V>,
     interval: Duration,
     private val devtools: DevtoolsClient,
@@ -28,15 +28,13 @@ internal class SøkPåNyttScheduler<V: Any>(
             // if record is more than 10_000 ms old
             if (timestamp + 10_000 < wallClockTime) {
                 runBlocking {
-                    devtools.delete(key)
-                }
-
-                runBlocking {
-                    søknadProducer.produce(
-                        topic = Topics.søknad,
-                        key = key,
-                        value = Søknader.generell(LocalDate.now().minusYears(Random.nextLong(18, 67)))
-                    )
+                    if (devtools.delete(key)) {
+                        søknadProducer.produce(
+                            topic = Topics.søknad,
+                            key = key,
+                            value = Søknader.generell(LocalDate.now().minusYears(Random.nextLong(18, 67)))
+                        )
+                    }
                 }
             }
         }
