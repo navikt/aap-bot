@@ -1,9 +1,7 @@
 package aap.bot
 
 import aap.bot.devtools.DevtoolsClient
-import aap.bot.dolly.DollyClient
-import aap.bot.dolly.DollyResponsePerson
-import aap.bot.dolly.Gruppe
+import aap.bot.devtools.TestPerson
 import aap.bot.oppgavestyring.OppgavestyringClient
 import aap.bot.streams.Topics
 import aap.bot.streams.topology
@@ -44,7 +42,6 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
     val config = loadConfig<Config>()
     val søknadProducer = kafka.createProducer(config.kafka, Topics.søknad)
     val oppgavestyring = OppgavestyringClient(config.oppgavestyring, config.azure)
-    val dolly = DollyClient(config.dolly, config.azure)
     val devtools = DevtoolsClient(config.devtools)
 
     environment.monitor.subscribe(ApplicationStopping) {
@@ -52,11 +49,11 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
         søknadProducer.close()
     }
 
-    val testSøkere = runBlocking {
-        dolly.hentBrukere(Gruppe.AAP_HAPPY_BOT)
+    val testPersoner = runBlocking {
+        devtools.getTestpersoner()
     }
 
-    produceAsync(testSøkere, søknadProducer)
+    produceAsync(testPersoner, søknadProducer)
 
     kafka.connect(
         config = config.kafka,
@@ -65,7 +62,7 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
             oppgavestyring = oppgavestyring,
             devtools = devtools,
             søknadProducer = søknadProducer,
-            testSøkere = testSøkere.map(DollyResponsePerson::fødselsnummer)
+            testSøkere = testPersoner.map(TestPerson::fødselsnummer)
         )
     )
 
@@ -80,7 +77,7 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
 }
 
 private fun Application.produceAsync(
-    testpersoner: List<DollyResponsePerson>,
+    testpersoner: List<TestPerson>,
     søknadProducer: Producer<String, SøknadKafkaDto>
 ) {
     launch {
