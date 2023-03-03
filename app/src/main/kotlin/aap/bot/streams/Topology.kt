@@ -4,6 +4,7 @@ import aap.bot.devtools.DevtoolsClient
 import aap.bot.oppgavestyring.OppgavestyringClient
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.dto.kafka.SøkereKafkaDto
+import no.nav.aap.dto.kafka.SøkereKafkaDtoHistorikk
 import no.nav.aap.dto.kafka.SøknadKafkaDto
 import no.nav.aap.kafka.streams.v2.Topology
 import no.nav.aap.kafka.streams.v2.topology
@@ -77,14 +78,14 @@ internal fun topology(
 /**
  * 11-2 og 11-4 kan være løst automatisk, trenger bare sjekke 11-3
  */
-private val TRENGER_INNGANGSVILKÅR = { dto: SøkereKafkaDto ->
-    dto.saker.any { sak ->
+private val TRENGER_INNGANGSVILKÅR = { dto: SøkereKafkaDtoHistorikk ->
+    dto.søkereKafkaDto.saker.any { sak ->
         sak.sakstyper.first { it.aktiv }.paragraf_11_3?.tilstand == AVVENTER_MANUELL_VURDERING
     }
 }
 
-private val TRENGER_LØSNING_LOKALKONTOR = { dto: SøkereKafkaDto ->
-    dto.saker.any { sak ->
+private val TRENGER_LØSNING_LOKALKONTOR = { dto: SøkereKafkaDtoHistorikk ->
+    dto.søkereKafkaDto.saker.any { sak ->
         sak.sakstyper.first { it.aktiv }.let { aktiv ->
             aktiv.paragraf_11_5?.tilstand == AVVENTER_MANUELL_VURDERING ||
                     aktiv.paragraf_11_6?.tilstand == AVVENTER_INNSTILLING
@@ -92,16 +93,16 @@ private val TRENGER_LØSNING_LOKALKONTOR = { dto: SøkereKafkaDto ->
     }
 }
 
-private val TRENGER_KVALITETSSIKRING_LOKALKONTOR = { dto: SøkereKafkaDto ->
-    dto.saker.any { sak ->
+private val TRENGER_KVALITETSSIKRING_LOKALKONTOR = { dto: SøkereKafkaDtoHistorikk ->
+    dto.søkereKafkaDto.saker.any { sak ->
         sak.sakstyper.first { it.aktiv }
             .paragraf_11_5
             ?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING
     }
 }
 
-private val TRENGER_LØSNING_NAY = { dto: SøkereKafkaDto ->
-    dto.saker.any { sak ->
+private val TRENGER_LØSNING_NAY = { dto: SøkereKafkaDtoHistorikk ->
+    dto.søkereKafkaDto.saker.any { sak ->
         val sakstype = sak.sakstyper.first { it.aktiv }
         sakstype.paragraf_11_6?.tilstand == AVVENTER_MANUELL_VURDERING ||
                 sakstype.paragraf_11_19?.tilstand == AVVENTER_MANUELL_VURDERING ||
@@ -109,8 +110,8 @@ private val TRENGER_LØSNING_NAY = { dto: SøkereKafkaDto ->
     }
 }
 
-private val TRENGER_KVALITETSSIKRING_NAY = { dto: SøkereKafkaDto ->
-    dto.saker.any { sak ->
+private val TRENGER_KVALITETSSIKRING_NAY = { dto: SøkereKafkaDtoHistorikk ->
+    dto.søkereKafkaDto.saker.any { sak ->
         val sakstype = sak.sakstyper.first { it.aktiv }
         sakstype.paragraf_11_6?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING ||
                 sakstype.paragraf_11_19?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING ||
@@ -118,8 +119,8 @@ private val TRENGER_KVALITETSSIKRING_NAY = { dto: SøkereKafkaDto ->
     }
 }
 
-private val SKAL_IVERKSETTES = { dto: SøkereKafkaDto ->
-    dto.saker.any { sak -> sak.tilstand == VEDTAK_FATTET }
+private val SKAL_IVERKSETTES = { dto: SøkereKafkaDtoHistorikk ->
+    dto.søkereKafkaDto.saker.any { sak -> sak.tilstand == VEDTAK_FATTET }
 }
 
 // tilstand på vilkår
