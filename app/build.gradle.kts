@@ -8,7 +8,7 @@ repositories {
     maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
 }
 
-val aapLibsVersion = "3.6.27"
+val aapLibsVersion = "3.6.28"
 val ktorVersion = "2.2.4"
 
 dependencies {
@@ -16,16 +16,20 @@ dependencies {
     implementation("com.github.navikt.aap-libs:ktor-utils:$aapLibsVersion")
     implementation("com.github.navikt.aap-libs:ktor-auth-azuread:$aapLibsVersion")
     implementation("com.github.navikt.aap-vedtak:kafka-dto:1.1.1")
+
     implementation("org.apache.kafka:kafka-clients:3.3.1")
 
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
+
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-server-core:$ktorVersion")
+    implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
+
+    implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
 
     implementation("io.micrometer:micrometer-registry-prometheus:1.10.0")
     implementation("ch.qos.logback:logback-classic:1.4.4")
