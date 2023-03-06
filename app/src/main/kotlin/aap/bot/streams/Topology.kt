@@ -3,7 +3,6 @@ package aap.bot.streams
 import aap.bot.devtools.DevtoolsClient
 import aap.bot.oppgavestyring.OppgavestyringClient
 import kotlinx.coroutines.runBlocking
-import no.nav.aap.dto.kafka.SøkereKafkaDto
 import no.nav.aap.dto.kafka.SøkereKafkaDtoHistorikk
 import no.nav.aap.dto.kafka.SøknadKafkaDto
 import no.nav.aap.kafka.streams.v2.Topology
@@ -63,7 +62,7 @@ internal fun topology(
             }
         }
 
-    val vedtakTable = consume(Topics.vedtak).produce(Tables.vedtak)
+    val vedtakTable = consume(Tables.vedtak)
 
     vedtakTable.schedule(
         SøkPåNyttScheduler(
