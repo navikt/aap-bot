@@ -15,7 +15,7 @@ dependencies {
     implementation("com.github.navikt.aap-libs:kafka-2:$aapLibsVersion")
     implementation("com.github.navikt.aap-libs:ktor-utils:$aapLibsVersion")
     implementation("com.github.navikt.aap-libs:ktor-auth-azuread:$aapLibsVersion")
-    implementation("com.github.navikt.aap-vedtak:kafka-dto:1.1.1")
+    implementation("com.github.navikt.aap-vedtak:kafka-dto:1.1.6")
 
     implementation("org.apache.kafka:kafka-clients:3.3.1")
 
