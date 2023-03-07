@@ -23,8 +23,9 @@ internal class OppgavestyringClient(
         personident: String,
         bruker: Testbruker = Testbruker.SAKSBEHANDLER,
     ) {
-        val inngangsvilkår = Løsninger.inngangsvilkår(bruker.ident).single()
-        send(personident, inngangsvilkår.path, bruker, inngangsvilkår.data)
+        Løsninger.inngangsvilkår().forEach { (path, løsning) ->
+            send(personident, path, bruker, løsning)
+        }
     }
 
     /**
@@ -34,7 +35,7 @@ internal class OppgavestyringClient(
         personident: String,
         bruker: Testbruker = Testbruker.VEILEDER_GAMLEOSLO_NAVKONTOR,
     ) {
-        Løsninger.fraLokalkontor(bruker.ident).forEach { (path, løsning) ->
+        Løsninger.fraLokalkontor().forEach { (path, løsning) ->
             send(personident, path, bruker, løsning)
         }
     }
@@ -46,7 +47,7 @@ internal class OppgavestyringClient(
         personident: String,
         bruker: Testbruker = Testbruker.FATTER,
     ) {
-        Kvalitetssikringer.lokalkontor(bruker).forEach { (path, kvalitetssikring) ->
+        Kvalitetssikringer.lokalkontor().forEach { (path, kvalitetssikring) ->
             send(personident, path, bruker, kvalitetssikring)
         }
     }
@@ -58,7 +59,7 @@ internal class OppgavestyringClient(
         personident: String,
         bruker: Testbruker = Testbruker.SAKSBEHANDLER,
     ) {
-        Løsninger.resten(bruker.ident).forEach { (path, løsning) ->
+        Løsninger.resten().forEach { (path, løsning) ->
             send(personident, path, bruker, løsning)
         }
     }
@@ -70,7 +71,7 @@ internal class OppgavestyringClient(
         personident: String,
         bruker: Testbruker = Testbruker.BESLUTTER,
     ) {
-        Kvalitetssikringer.nay(bruker).forEach { (path, kvalitetssikring) ->
+        Kvalitetssikringer.nay().forEach { (path, kvalitetssikring) ->
             send(personident, path, bruker, kvalitetssikring)
         }
     }
