@@ -78,7 +78,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "kvalitetssikre/paragraf_11_5",
-            bruker = Testbruker.FATTER,
+            bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // FATTER
             body = Kvalitetssikring_11_5(
                 løsningId = UUID.randomUUID(),
                 kravOmNedsattArbeidsevneErGodkjent = true,
