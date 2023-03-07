@@ -19,7 +19,7 @@ internal class OppgavestyringClient(
 
     /** Sendes inn til slutt */
     suspend fun iverksett(personident: String) {
-        val response = httpClient.post("${oppgavestyring.host}/sak/$personident/iverksett") {
+        val response = httpClient.post("${oppgavestyring.host}/api/sak/$personident/iverksett") {
             contentType(ContentType.Application.Json)
             bearerAuth(tokenProvider.getAccessToken(Testbruker.BESLUTTER))
         }
@@ -197,7 +197,7 @@ internal class OppgavestyringClient(
     }
 
     private suspend fun send(personident: String, path: String, bruker: Testbruker, body: Any) {
-        val response = httpClient.post("${oppgavestyring.host}/sak/$personident/$path") {
+        val response = httpClient.post("${oppgavestyring.host}/api/sak/$personident/$path") {
             contentType(ContentType.Application.Json)
             bearerAuth(tokenProvider.getAccessToken(bruker))
             setBody(body)
