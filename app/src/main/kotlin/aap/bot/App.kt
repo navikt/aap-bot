@@ -73,6 +73,13 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
 
 
     routing {
+        get("/reset") {
+            testPersoner.forEach { søker ->
+                resetSøker(søker, devtools, søknadProducer)
+                delay(10_000)
+            }
+        }
+
         route("/actuator") {
             get("/metrics") { call.respondText(prometheus.scrape()) }
             get("/live") { call.respondText("bot") }

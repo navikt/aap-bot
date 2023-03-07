@@ -16,6 +16,8 @@ spec:
       rules:
         - application: oppgavestyring
         - application: devtools
+  ingresses:
+    - https://aap-bot.intern.dev.nav.no
   azure:
     application:
       enabled: true
