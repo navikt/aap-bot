@@ -35,7 +35,9 @@ fun main() {
 private val secureLog = LoggerFactory.getLogger("secureLog")
 
 fun Application.bot(kafka: KStreams = KafkaStreams()) {
-    Thread.currentThread().setUncaughtExceptionHandler { _, e -> secureLog.error("Uhåndtert feil", e) }
+    Thread.currentThread().setUncaughtExceptionHandler { thread, exception ->
+        secureLog.error("Uhåndtert feil. Thread:${thread.name}", exception)
+    }
 
     val prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     install(MicrometerMetrics) { registry = prometheus }

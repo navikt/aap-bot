@@ -75,11 +75,16 @@ internal fun topology(
 }
 
 /**
- * 11-2 og 11-4 kan være løst automatisk, trenger bare sjekke 11-3
+ * 11-2 og 11-4 kan være løst maskinelt, men kan måtte bli vurderet manuelt
  */
 private val TRENGER_INNGANGSVILKÅR = { dto: SøkereKafkaDtoHistorikk ->
     dto.søkereKafkaDto.saker.any { sak ->
-        sak.sakstyper.first { it.aktiv }.paragraf_11_3?.tilstand == AVVENTER_MANUELL_VURDERING
+        val aktivSak = sak.sakstyper.first { it.aktiv }
+        listOf(
+            aktivSak.paragraf_11_2?.tilstand,
+            aktivSak.paragraf_11_3?.tilstand,
+            aktivSak.paragraf_11_4FørsteLedd?.tilstand
+        ).any { tilstand -> tilstand == AVVENTER_MANUELL_VURDERING }
     }
 }
 
