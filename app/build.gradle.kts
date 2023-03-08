@@ -38,7 +38,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("aap.bot.AppKt")
+    mainClass.set("bot.AppKt")
 }
 
 tasks {
