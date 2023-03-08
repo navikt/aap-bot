@@ -5,6 +5,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import java.net.URL
 import java.time.LocalDate
@@ -20,10 +21,15 @@ internal class DevtoolsClient(private val config: DevtoolsConfig) {
         val response = httpClient.delete("${config.host}/$personident") {
             contentType(ContentType.Application.Json)
         }
-        val statuses = response.body<List<TombstoneStatus>>()
 
-        require(response.status == HttpStatusCode.OK) { "Feil http status fra devtools: ${response.status}" }
-        return statuses.all { it.deleted }
+        require(response.status == HttpStatusCode.OK) {
+            """
+                Wrong HTTP Status from devtools: ${response.status}
+                Message: ${response.bodyAsText()}
+            """
+        }
+
+        return response.body<List<TombstoneStatus>>().all { it.deleted }
     }
 
     suspend fun getTestpersoner(): List<TestPerson> {
@@ -31,7 +37,14 @@ internal class DevtoolsClient(private val config: DevtoolsConfig) {
             accept(ContentType.Application.Json)
             url { parameters.append("gruppe", "5865") }
         }
-        require(response.status == HttpStatusCode.OK)
+
+        require(response.status == HttpStatusCode.OK) {
+            """
+                Wrong HTTP Status from devtools: ${response.status}
+                Message: ${response.bodyAsText()}
+            """
+        }
+
         return response.body()
     }
 }

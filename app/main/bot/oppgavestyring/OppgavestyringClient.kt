@@ -5,6 +5,7 @@ import bot.http.HttpClientFactory
 import io.ktor.client.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import no.nav.aap.ktor.client.AzureConfig
 import java.time.LocalDate
@@ -23,7 +24,13 @@ internal class OppgavestyringClient(
             contentType(ContentType.Application.Json)
             bearerAuth(tokenProvider.getAccessToken(Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR)) // BESLUTTER
         }
-        require(response.status == HttpStatusCode.OK)
+
+        require(response.status == HttpStatusCode.OK) {
+            """
+                Wrong HTTP Status from iverksettelse av oppgavestyring: ${response.status}
+                Message: ${response.bodyAsText()}
+            """
+        }
     }
 
     // todo: Hvis man vil videre enn vedtaket, må man sende inn meldeplikt
@@ -202,6 +209,11 @@ internal class OppgavestyringClient(
             bearerAuth(tokenProvider.getAccessToken(bruker))
             setBody(body)
         }
-        require(response.status == HttpStatusCode.OK)
+        require(response.status == HttpStatusCode.OK) {
+            """
+                Wrong HTTP Status from oppgavestyring: ${response.status}
+                Message: ${response.bodyAsText()}
+            """
+        }
     }
 }
