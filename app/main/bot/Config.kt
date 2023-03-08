@@ -1,6 +1,6 @@
-package aap.bot
+package bot
 
-import aap.bot.devtools.DevtoolsConfig
+import bot.devtools.DevtoolsConfig
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.ktor.client.AzureConfig
 import java.net.URL

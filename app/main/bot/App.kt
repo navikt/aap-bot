@@ -1,15 +1,17 @@
-package aap.bot
+package bot
 
-import aap.bot.devtools.DevtoolsClient
-import aap.bot.devtools.TestPerson
-import aap.bot.oppgavestyring.OppgavestyringClient
-import aap.bot.streams.Topics
-import aap.bot.streams.topology
-import aap.bot.søknad.Søknader
+import bot.devtools.DevtoolsClient
+import bot.devtools.TestPerson
+import bot.oppgavestyring.OppgavestyringClient
+import bot.streams.Topics
+import bot.streams.topology
+import bot.søknad.Søknader
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusConfig
@@ -17,11 +19,10 @@ import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.aap.dto.kafka.SøknadKafkaDto
 import no.nav.aap.kafka.streams.v2.KStreams
 import no.nav.aap.kafka.streams.v2.KafkaStreams
-import no.nav.aap.kafka.streams.v2.Topic
 import no.nav.aap.ktor.config.loadConfig
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -31,13 +32,18 @@ fun main() {
     embeddedServer(Netty, port = 8080, module = Application::bot).start(wait = true)
 }
 
-internal val secureLog = LoggerFactory.getLogger("secureLog")
+private val secureLog = LoggerFactory.getLogger("secureLog")
 
 fun Application.bot(kafka: KStreams = KafkaStreams()) {
-    Thread.currentThread().setUncaughtExceptionHandler { _, e -> log.error("Uhåndtert feil", e) }
+    Thread.currentThread().setUncaughtExceptionHandler { _, e -> secureLog.error("Uhåndtert feil", e) }
 
     val prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     install(MicrometerMetrics) { registry = prometheus }
+
+    install(CallLogging) {
+        logger = secureLog
+        filter { call -> call.request.path().startsWith("/actuator").not() }
+    }
 
     val config = loadConfig<Config>()
     val søknadProducer = kafka.createProducer(config.kafka, Topics.søknad)
@@ -94,21 +100,19 @@ private suspend fun resetSøker(
     søknadProducer: Producer<String, SøknadKafkaDto>
 ) {
     if (devtools.delete(person.fødselsnummer)) {
-        val personident = person.fødselsnummer
-        val søknad = Søknader.generell(person.fødselsdato)
-        søknadProducer.produce(Topics.søknad, personident, søknad)
+        søknadProducer.produceSøknad(person.fødselsnummer) {
+            Søknader.generell(person.fødselsdato)
+        }
     }
 }
 
-internal inline fun <reified V : Any> Producer<String, V>.produce(topic: Topic<V>, key: String, value: V) {
-    val record = ProducerRecord(topic.name, key, value)
-    send(record).get().also {
-        secureLog.trace(
-            "Sender inn søknad {} {} {} {}",
-            StructuredArguments.kv("key", record.key()),
-            StructuredArguments.kv("topic", topic.name),
-            StructuredArguments.kv("partition", it.partition()),
-            StructuredArguments.kv("value", record.value()),
-        )
-    }
+internal fun Producer<String, SøknadKafkaDto>.produceSøknad(personident: String, søknad: () -> SøknadKafkaDto) {
+    val metadata = send(ProducerRecord(Topics.søknad.name, personident, søknad())).get()
+    secureLog.trace(
+        "Søknad sendt for $personident",
+        kv("key", personident),
+        kv("value", søknad()),
+        kv("partition", metadata.partition()),
+        kv("topic", metadata.topic())
+    )
 }

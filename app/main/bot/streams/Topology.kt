@@ -1,7 +1,7 @@
-package aap.bot.streams
+package bot.streams
 
-import aap.bot.devtools.DevtoolsClient
-import aap.bot.oppgavestyring.OppgavestyringClient
+import bot.devtools.DevtoolsClient
+import bot.oppgavestyring.OppgavestyringClient
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.dto.kafka.SøkereKafkaDtoHistorikk
 import no.nav.aap.dto.kafka.SøknadKafkaDto

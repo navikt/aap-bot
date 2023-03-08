@@ -1,4 +1,4 @@
-package aap.bot.oppgavestyring
+package bot.oppgavestyring
 
 import java.time.LocalDate
 

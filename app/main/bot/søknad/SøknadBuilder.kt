@@ -1,4 +1,4 @@
-package aap.bot.søknad
+package bot.søknad
 
 import no.nav.aap.dto.kafka.Medlemskap
 import no.nav.aap.dto.kafka.Studier

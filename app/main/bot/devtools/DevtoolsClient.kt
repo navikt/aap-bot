@@ -1,6 +1,6 @@
-package aap.bot.devtools
+package bot.devtools
 
-import aap.bot.http.HttpClientFactory
+import bot.http.HttpClientFactory
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.logging.*

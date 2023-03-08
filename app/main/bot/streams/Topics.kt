@@ -1,4 +1,4 @@
-package aap.bot.streams
+package bot.streams
 
 import no.nav.aap.dto.kafka.SøkereKafkaDtoHistorikk
 import no.nav.aap.dto.kafka.SøknadKafkaDto

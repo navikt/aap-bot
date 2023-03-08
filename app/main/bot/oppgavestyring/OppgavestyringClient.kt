@@ -1,7 +1,7 @@
-package aap.bot.oppgavestyring
+package bot.oppgavestyring
 
-import aap.bot.OppgavestyringConfig
-import aap.bot.http.HttpClientFactory
+import bot.OppgavestyringConfig
+import bot.http.HttpClientFactory
 import io.ktor.client.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
@@ -11,22 +11,22 @@ import java.time.LocalDate
 import java.util.*
 
 internal class OppgavestyringClient(
-    private val oppgavestyring: OppgavestyringConfig,
+    private val oppgavestyringConfig: OppgavestyringConfig,
     azure: AzureConfig,
 ) {
-    private val tokenProvider: TokenProvider = TokenProvider(oppgavestyring, azure)
-    private val httpClient: HttpClient = HttpClientFactory.create(LogLevel.ALL)
+    private val tokenProvider: TokenProvider = TokenProvider(oppgavestyringConfig, azure)
+    private val oppgavestyringClient: HttpClient = HttpClientFactory.create(LogLevel.ALL)
 
     /** Sendes inn til slutt */
     suspend fun iverksett(personident: String) {
-        val response = httpClient.post("${oppgavestyring.host}/api/sak/$personident/iverksett") {
+        val response = oppgavestyringClient.post("${oppgavestyringConfig.host}/api/sak/$personident/iverksett") {
             contentType(ContentType.Application.Json)
-            bearerAuth(tokenProvider.getAccessToken(Testbruker.BESLUTTER))
+            bearerAuth(tokenProvider.getAccessToken(Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR)) // BESLUTTER
         }
         require(response.status == HttpStatusCode.OK)
     }
 
-    // todo: sende inn meldeplikt
+    // todo: Hvis man vil videre enn vedtaket, må man sende inn meldeplikt
 
     /** Sendes inn først */
     suspend fun løsningInngangsvilkår(personident: String) {
@@ -34,7 +34,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "losning/inngangsvilkar",
-            bruker = Testbruker.SAKSBEHANDLER,
+            bruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR, // SAKSBEHANDLER
             body = Inngangsvilkår(
                 Inngangsvilkår.Løsning_11_2("JA"),
                 Inngangsvilkår.Løsning_11_3(true),
@@ -48,7 +48,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "losning/paragraf_11_5",
-            bruker = Testbruker.VEILEDER_GAMLEOSLO_NAVKONTOR,
+            bruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR, // VEILEDER_GAMLEOSLO_NAVKONTOR
             body = Løsning_11_5(
                 kravOmNedsattArbeidsevneErOppfylt = true,
                 nedsettelseSkyldesSykdomEllerSkade = true,
@@ -63,7 +63,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "innstilling/paragraf_11_6",
-            bruker = Testbruker.VEILEDER_GAMLEOSLO_NAVKONTOR,
+            bruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR, // VEILEDER_GAMLEOSLO_NAVKONTOR
             body = Innstilling_11_6(
                 harBehovForBehandling = true,
                 harBehovForTiltak = true,
@@ -94,7 +94,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "losning/paragraf_11_6",
-            bruker = Testbruker.SAKSBEHANDLER,
+            bruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR, // SAKSBEHANDLER
             body = Løsning_11_6(
                 harBehovForBehandling = true,
                 harBehovForTiltak = true,
@@ -106,7 +106,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "losning/paragraf_11_19",
-            bruker = Testbruker.SAKSBEHANDLER,
+            bruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR, // SAKSBEHANDLER
             body = Løsning_11_19(
                 beregningsdato = LocalDate.now(),
                 grunnForDato = "tiden den er nå"
@@ -116,7 +116,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "losning/paragraf_22_13",
-            bruker = Testbruker.SAKSBEHANDLER,
+            bruker = Testbruker.SAKSBEHANDLER_OG_VEILEDER_ALLE_NAVKONTOR, // SAKSBEHANDLER
             body = Løsning_22_13(
                 bestemmesAv = "soknadstidspunkt",
                 unntak = "unntak",
@@ -132,7 +132,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "kvalitetssikre/paragraf_11_2",
-            bruker = Testbruker.BESLUTTER,
+            bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
             body = Kvalitetssikring_11_2(
                 løsningId = UUID.randomUUID(),
                 erGodkjent = true,
@@ -143,7 +143,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "kvalitetssikre/paragraf_11_3",
-            bruker = Testbruker.BESLUTTER,
+            bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
             body = Kvalitetssikring_11_3(
                 løsningId = UUID.randomUUID(),
                 erGodkjent = true,
@@ -154,7 +154,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "kvalitetssikre/paragraf_11_4_ledd2Og3",
-            bruker = Testbruker.BESLUTTER,
+            bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
             body = Kvalitetssikring_11_4_ledd2og3(
                 løsningId = UUID.randomUUID(),
                 erGodkjent = true,
@@ -165,7 +165,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "kvalitetssikre/paragraf_11_6",
-            bruker = Testbruker.BESLUTTER,
+            bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
             body = Kvalitetssikring_11_6(
                 løsningId = UUID.randomUUID(),
                 erGodkjent = true,
@@ -176,7 +176,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "kvalitetssikre/paragraf_11_19",
-            bruker = Testbruker.BESLUTTER,
+            bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
             body = Kvalitetssikring_11_19(
                 løsningId = UUID.randomUUID(),
                 erGodkjent = true,
@@ -187,7 +187,7 @@ internal class OppgavestyringClient(
         send(
             personident = personident,
             path = "kvalitetssikre/paragraf_22_13",
-            bruker = Testbruker.BESLUTTER,
+            bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
             body = Kvalitetssikring_22_13(
                 løsningId = UUID.randomUUID(),
                 erGodkjent = true,
@@ -197,7 +197,7 @@ internal class OppgavestyringClient(
     }
 
     private suspend fun send(personident: String, path: String, bruker: Testbruker, body: Any) {
-        val response = httpClient.post("${oppgavestyring.host}/api/sak/$personident/$path") {
+        val response = oppgavestyringClient.post("${oppgavestyringConfig.host}/api/sak/$personident/$path") {
             contentType(ContentType.Application.Json)
             bearerAuth(tokenProvider.getAccessToken(bruker))
             setBody(body)

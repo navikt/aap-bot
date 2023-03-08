@@ -1,7 +1,7 @@
-package aap.bot.oppgavestyring
+package bot.oppgavestyring
 
-import aap.bot.OppgavestyringConfig
-import aap.bot.http.HttpClientFactory
+import bot.OppgavestyringConfig
+import bot.http.HttpClientFactory
 import io.ktor.client.plugins.logging.*
 import no.nav.aap.ktor.client.AzureAdTokenProvider
 import no.nav.aap.ktor.client.AzureConfig
