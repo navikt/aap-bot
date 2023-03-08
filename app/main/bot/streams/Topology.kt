@@ -78,14 +78,14 @@ internal fun topology(
  * 11-2 og 11-4 kan være løst maskinelt, men kan måtte bli vurderet manuelt
  */
 private val TRENGER_INNGANGSVILKÅR = { dto: SøkereKafkaDtoHistorikk ->
-    dto.søkereKafkaDto.saker.any { sak ->
-        val aktivSak = sak.sakstyper.first { it.aktiv }
-        listOf(
-            aktivSak.paragraf_11_2?.tilstand,
-            aktivSak.paragraf_11_3?.tilstand,
-            aktivSak.paragraf_11_4FørsteLedd?.tilstand
-        ).any { tilstand -> tilstand == AVVENTER_MANUELL_VURDERING }
-    }
+    dto.søkereKafkaDto
+        .saker.first { it.tilstand == AVVENTER_VURDERING }
+        .sakstyper.filter { it.aktiv }
+        .any {
+            it.paragraf_11_2?.tilstand == AVVENTER_MANUELL_VURDERING ||
+                    it.paragraf_11_3?.tilstand == AVVENTER_MANUELL_VURDERING ||
+                    it.paragraf_11_4FørsteLedd?.tilstand == AVVENTER_MANUELL_VURDERING
+        }
 }
 
 private val TRENGER_LØSNING_LOKALKONTOR = { dto: SøkereKafkaDtoHistorikk ->

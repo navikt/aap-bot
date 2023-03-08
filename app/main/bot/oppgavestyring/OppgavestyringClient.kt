@@ -37,7 +37,6 @@ internal class OppgavestyringClient(
 
     /** Sendes inn først eller hvis en av inngangsvilkårene ikke oppfylles maskinelt */
     suspend fun løsningInngangsvilkår(personident: String) {
-        // TODO: Skal vi bare svarer på 11_2 dersom LovMe svarer UAVKLART, eller kan man ALLTID svare JA
         send(
             personident = personident,
             path = "losning/inngangsvilkar",
