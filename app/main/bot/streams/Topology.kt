@@ -23,9 +23,9 @@ internal fun topology(
     testSøkere: List<String>,
 ): Topology = topology {
     consume(Topics.søkere)
-        .filterKey { personident ->
-            (personident in testSøkere).also { secureLog.debug("$personident in $testSøkere == $it") }
-        }
+        .filterKey { personident -> personident == "1" }
+//            (personident in testSøkere).also { secureLog.debug("$personident in $testSøkere == $it") }
+//        }
         .secureLogWithKey { personident, value -> debug("Automatisk behandling av $personident, søker: $value") }
         .branch(TRENGER_INNGANGSVILKÅR) {
             it.forEach { personident, _ ->
