@@ -61,12 +61,7 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
         devtools.getTestpersoner()
     }
 
-    launch {
-        testPersoner.forEach { søker ->
-            resetSøker(søker, devtools, søknadProducer)
-            delay(10_000)
-        }
-    }
+    resetSøkere(testPersoner, devtools, søknadProducer)
 
     kafka.connect(
         config = config.kafka,
@@ -79,14 +74,10 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
         )
     )
 
-
     routing {
         get("/reset") {
-            launch {
-                testPersoner.forEach { søker ->
-                    resetSøker(søker, devtools, søknadProducer)
-                }
-            }
+            this@bot.resetSøkere(testPersoner, devtools, søknadProducer)
+            call.respondText("Resetter søkere.")
         }
 
         route("/actuator") {
@@ -97,15 +88,17 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
     }
 }
 
-private suspend fun resetSøker(
-    person: TestPerson,
+private fun Application.resetSøkere(
+    testPersoner: List<TestPerson>,
     devtools: DevtoolsClient,
     søknadProducer: Producer<String, SøknadKafkaDto>
-) {
-    if (devtools.delete(person.fødselsnummer)) {
-        delay(10_000) // forsikre at ktables har blitt slettet
-        søknadProducer.produceSøknad(person.fødselsnummer) {
-            Søknader.generell(person.fødselsdato)
+) = launch {
+    testPersoner.forEach { søker ->
+        if (devtools.delete(søker.fødselsnummer)) {
+            delay(10_000) // forsikre at ktables har blitt slettet
+            søknadProducer.produceSøknad(søker.fødselsnummer) {
+                Søknader.generell(søker.fødselsdato)
+            }
         }
     }
 }

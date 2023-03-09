@@ -3,6 +3,7 @@ package bot.streams
 import bot.devtools.DevtoolsClient
 import bot.produceSøknad
 import bot.søknad.Søknader
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.dto.kafka.SøknadKafkaDto
 import no.nav.aap.kafka.streams.v2.KTable
@@ -29,6 +30,7 @@ internal class SøkPåNyttScheduler<V : Any>(
             if (timestamp + 10_000 < wallClockTime) {
                 runBlocking {
                     if (devtools.delete(personident)) {
+                        delay(10_000)
                         søknadProducer.produceSøknad(personident) {
                             Søknader.generell(LocalDate.now().minusYears(Random.nextLong(18, 67)))
                         }
