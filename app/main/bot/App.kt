@@ -23,6 +23,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.aap.dto.kafka.SøknadKafkaDto
 import no.nav.aap.kafka.streams.v2.KStreams
 import no.nav.aap.kafka.streams.v2.KafkaStreams
+import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.ktor.config.loadConfig
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -48,20 +49,18 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
     }
 
     val config = loadConfig<Config>()
-    val søknadProducer = kafka.createProducer(config.kafka, Topics.søknad)
     val oppgavestyring = OppgavestyringClient(config.oppgavestyring, config.azure)
     val devtools = DevtoolsClient(config.devtools)
 
     environment.monitor.subscribe(ApplicationStopping) {
         kafka.close()
-        søknadProducer.close()
     }
 
     val testPersoner = runBlocking {
         devtools.getTestpersoner()
     }
 
-    resetSøkere(testPersoner, devtools, søknadProducer)
+    resetSøkere(testPersoner, devtools, kafka, config.kafka)
 
     kafka.connect(
         config = config.kafka,
@@ -69,14 +68,15 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
         topology = topology(
             oppgavestyring = oppgavestyring,
             devtools = devtools,
-            søknadProducer = søknadProducer,
+            kafka = kafka,
+            config = config.kafka,
             testSøkere = testPersoner.map(TestPerson::fødselsnummer)
         )
     )
 
     routing {
         get("/reset") {
-            this@bot.resetSøkere(testPersoner, devtools, søknadProducer)
+            this@bot.resetSøkere(testPersoner, devtools, kafka, config.kafka)
             call.respondText("Resetter søkere.")
         }
 
@@ -91,13 +91,16 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
 private fun Application.resetSøkere(
     testPersoner: List<TestPerson>,
     devtools: DevtoolsClient,
-    søknadProducer: Producer<String, SøknadKafkaDto>
+    kafka: KStreams,
+    kafkaConfig: StreamsConfig
 ) = launch {
     testPersoner.forEach { søker ->
         if (devtools.delete(søker.fødselsnummer)) {
             delay(10_000) // forsikre at ktables har blitt slettet
-            søknadProducer.produceSøknad(søker.fødselsnummer) {
-                Søknader.generell(søker.fødselsdato)
+            kafka.createProducer(kafkaConfig, Topics.søknad).use { producer ->
+                producer.produceSøknad(søker.fødselsnummer) {
+                    Søknader.generell(søker.fødselsdato)
+                }
             }
         }
     }

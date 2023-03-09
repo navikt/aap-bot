@@ -5,7 +5,9 @@ import bot.oppgavestyring.OppgavestyringClient
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.dto.kafka.SøkereKafkaDtoHistorikk
 import no.nav.aap.dto.kafka.SøknadKafkaDto
+import no.nav.aap.kafka.streams.v2.KStreams
 import no.nav.aap.kafka.streams.v2.Topology
+import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.kafka.streams.v2.topology
 import org.apache.kafka.clients.producer.Producer
 import org.slf4j.LoggerFactory
@@ -16,7 +18,8 @@ private val secureLog = LoggerFactory.getLogger("secureLog")
 internal fun topology(
     oppgavestyring: OppgavestyringClient,
     devtools: DevtoolsClient,
-    søknadProducer: Producer<String, SøknadKafkaDto>,
+    kafka: KStreams,
+    config: StreamsConfig,
     testSøkere: List<String>,
 ): Topology = topology {
     consume(Topics.søkere)
@@ -81,7 +84,8 @@ internal fun topology(
             ktable = vedtakTable,
             interval = 10.seconds,
             devtools = devtools,
-            søknadProducer = søknadProducer,
+            kafka = kafka,
+            config = config,
         )
     )
 }

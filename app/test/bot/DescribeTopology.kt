@@ -8,7 +8,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.kafka.streams.v2.test.KStreamsMock
 import no.nav.aap.ktor.client.AzureConfig
-import org.apache.kafka.clients.producer.MockProducer
 import org.junit.jupiter.api.Test
 import java.io.File
 import java.net.URL
@@ -20,10 +19,11 @@ internal class DescribeTopology {
         val azureConfig = AzureConfig(URL("http://azure.mock"), "", "")
         val oppgavestyring = OppgavestyringClient(oppgavestyringConfig, azureConfig)
         val devtools = DevtoolsClient(DevtoolsConfig(URL("http://dev.tools")))
-        val topology = topology(oppgavestyring, devtools, MockProducer(), listOf())
 
         val kafka = KStreamsMock()
-        kafka.connect(topology, StreamsConfig("", ""), SimpleMeterRegistry())
+        val kafkaConfig = StreamsConfig("", "")
+        val topology = topology(oppgavestyring, devtools, kafka, kafkaConfig, listOf())
+        kafka.connect(topology, kafkaConfig, SimpleMeterRegistry())
 
         val mermaid = kafka.visulize().mermaid().generateDiagram()
         File("../docs/topology.mmd").apply { writeText(mermaid) }
