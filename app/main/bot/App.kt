@@ -82,9 +82,11 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
 
     routing {
         get("/reset") {
-            testPersoner.forEach { søker ->
-                resetSøker(søker, devtools, søknadProducer)
-                delay(10_000)
+            launch {
+                testPersoner.forEach { søker ->
+                    resetSøker(søker, devtools, søknadProducer)
+                    delay(10_000)
+                }
             }
         }
 

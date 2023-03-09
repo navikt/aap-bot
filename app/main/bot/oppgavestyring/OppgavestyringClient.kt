@@ -8,6 +8,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import no.nav.aap.ktor.client.AzureConfig
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
@@ -203,7 +204,9 @@ internal class OppgavestyringClient(
     }
 
     private suspend fun send(personident: String, path: String, bruker: Testbruker, body: Any) {
-        val response = oppgavestyringClient.post("${oppgavestyringConfig.host}/api/sak/$personident/$path") {
+        val url = "${oppgavestyringConfig.host}/api/sak/$personident/$path"
+        secureLog.info("Sender inn løsning/kvalitetssikring til oppgavestyring for $personident på $url")
+        val response = oppgavestyringClient.post(url) {
             contentType(ContentType.Application.Json)
             bearerAuth(tokenProvider.getAccessToken(bruker))
             setBody(body)
@@ -216,3 +219,5 @@ internal class OppgavestyringClient(
         }
     }
 }
+
+private val secureLog = LoggerFactory.getLogger("secureLog")
