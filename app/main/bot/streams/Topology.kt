@@ -314,9 +314,9 @@ private fun sjekkTilstand(
     sakstype: (SøkereKafkaDto.SakstypeKafkaDto) -> Boolean
 ): Boolean {
     return dto.søkereKafkaDto
-        .saker.first { it.tilstand == AVVENTER_VURDERING }
-        .sakstyper.filter { it.aktiv }
-        .any(sakstype)
+        .saker.firstOrNull { it.tilstand == AVVENTER_VURDERING || it.tilstand == AVVENTER_KVALITETSSIKRING }
+        ?.sakstyper?.filter { it.aktiv }
+        ?.any(sakstype) ?: false
 }
 
 
