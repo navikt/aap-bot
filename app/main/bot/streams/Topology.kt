@@ -90,6 +90,7 @@ internal fun topology(
  * 11-2 og 11-4 kan være løst maskinelt, men kan måtte bli vurderet manuelt
  */
 private val TRENGER_INNGANGSVILKÅR = { dto: SøkereKafkaDtoHistorikk ->
+    secureLog.debug("Sjekk inngangsvilkår for: ${dto.søkereKafkaDto.personident}")
     dto.søkereKafkaDto
         .saker.first { it.tilstand == AVVENTER_VURDERING }
         .sakstyper.filter { it.aktiv }
@@ -101,6 +102,7 @@ private val TRENGER_INNGANGSVILKÅR = { dto: SøkereKafkaDtoHistorikk ->
 }
 
 private val TRENGER_LØSNING_LOKALKONTOR = { dto: SøkereKafkaDtoHistorikk ->
+    secureLog.debug("Sjekk løsning lokalkontor for: ${dto.søkereKafkaDto.personident}")
     dto.søkereKafkaDto.saker.any { sak ->
         sak.sakstyper.first { it.aktiv }.let { aktiv ->
             aktiv.paragraf_11_5?.tilstand == AVVENTER_MANUELL_VURDERING ||
@@ -110,6 +112,7 @@ private val TRENGER_LØSNING_LOKALKONTOR = { dto: SøkereKafkaDtoHistorikk ->
 }
 
 private val TRENGER_KVALITETSSIKRING_LOKALKONTOR = { dto: SøkereKafkaDtoHistorikk ->
+    secureLog.debug("Sjekk kvalitetssikring lokalkontor for: ${dto.søkereKafkaDto.personident}")
     dto.søkereKafkaDto.saker.any { sak ->
         sak.sakstyper.first { it.aktiv }
             .paragraf_11_5
@@ -118,6 +121,7 @@ private val TRENGER_KVALITETSSIKRING_LOKALKONTOR = { dto: SøkereKafkaDtoHistori
 }
 
 private val TRENGER_LØSNING_NAY = { dto: SøkereKafkaDtoHistorikk ->
+    secureLog.debug("Sjekk løsning NAY for: ${dto.søkereKafkaDto.personident}")
     dto.søkereKafkaDto.saker.any { sak ->
         val sakstype = sak.sakstyper.first { it.aktiv }
         sakstype.paragraf_11_6?.tilstand == AVVENTER_MANUELL_VURDERING ||
@@ -127,6 +131,7 @@ private val TRENGER_LØSNING_NAY = { dto: SøkereKafkaDtoHistorikk ->
 }
 
 private val TRENGER_KVALITETSSIKRING_NAY = { dto: SøkereKafkaDtoHistorikk ->
+    secureLog.debug("Sjekk kvalitetssikring NAY for: ${dto.søkereKafkaDto.personident}")
     dto.søkereKafkaDto.saker.any { sak ->
         val sakstype = sak.sakstyper.first { it.aktiv }
         sakstype.paragraf_11_6?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING ||
@@ -136,6 +141,7 @@ private val TRENGER_KVALITETSSIKRING_NAY = { dto: SøkereKafkaDtoHistorikk ->
 }
 
 private val SKAL_IVERKSETTES = { dto: SøkereKafkaDtoHistorikk ->
+    secureLog.debug("Sjekk iverksetting for: ${dto.søkereKafkaDto.personident}")
     dto.søkereKafkaDto.saker.any { sak -> sak.tilstand == VEDTAK_FATTET }
 }
 
