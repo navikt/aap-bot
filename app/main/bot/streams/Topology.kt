@@ -23,7 +23,7 @@ internal fun topology(
         .filterKey { personident ->
             (personident in testSøkere).also { secureLog.debug("$personident in $testSøkere == $it") }
         }
-        .secureLogWithKey { personident, _ -> debug("Automatisk behandling av $personident") }
+        .secureLogWithKey { personident, value -> debug("Automatisk behandling av $personident, søker: $value") }
         .branch(TRENGER_INNGANGSVILKÅR) {
             it.forEach { personident, _ ->
                 secureLog.debug("Sender inn løsning på inngangsvilkår for $personident")
