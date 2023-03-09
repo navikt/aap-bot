@@ -85,7 +85,6 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
             launch {
                 testPersoner.forEach { søker ->
                     resetSøker(søker, devtools, søknadProducer)
-                    delay(10_000)
                 }
             }
         }
@@ -104,6 +103,7 @@ private suspend fun resetSøker(
     søknadProducer: Producer<String, SøknadKafkaDto>
 ) {
     if (devtools.delete(person.fødselsnummer)) {
+        delay(10_000) // forsikre at ktables har blitt slettet
         søknadProducer.produceSøknad(person.fødselsnummer) {
             Søknader.generell(person.fødselsdato)
         }
