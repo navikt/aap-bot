@@ -25,11 +25,14 @@ internal class OppgavestyringClient(
             bearerAuth(tokenProvider.getAccessToken(Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR)) // BESLUTTER
         }
 
-        require(response.status == HttpStatusCode.OK) {
-            """
+        if (!response.status.isSuccess()) {
+            secureLog.warn(
+                """
                 Wrong HTTP Status from iverksettelse av oppgavestyring: ${response.status}
+                Skipper melding og leser neste.
                 Message: ${response.bodyAsText()}
             """
+            )
         }
     }
 
@@ -41,11 +44,15 @@ internal class OppgavestyringClient(
             bearerAuth(tokenProvider.getAccessToken(bruker))
             setBody(body)
         }
-        require(response.status == HttpStatusCode.OK) {
-            """
-                Wrong HTTP Status from oppgavestyring: ${response.status}
-                Message: ${response.bodyAsText()}
-            """
+
+        if (!response.status.isSuccess()) {
+            secureLog.warn(
+                """
+                    Wrong HTTP Status from oppgavestyring: ${response.status}
+                    Skipper melding og leser neste.
+                    Message: ${response.bodyAsText()}
+                """
+            )
         }
     }
 }
