@@ -117,25 +117,6 @@ internal fun topology(
         }
 
         .branch({ dto ->
-            sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_5?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
-        }) {
-            it.forEach { personident, _ ->
-                oppgavestyring.send(
-                    personident = personident,
-                    path = "kvalitetssikre/paragraf_11_5",
-                    bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // FATTER
-                    body = Kvalitetssikring_11_5(
-                        løsningId = UUID.randomUUID(),
-                        kravOmNedsattArbeidsevneErGodkjent = true,
-                        kravOmNedsattArbeidsevneErGodkjentBegrunnelse = "Godkjent",
-                        nedsettelseSkyldesSykdomEllerSkadeErGodkjent = true,
-                        nedsettelseSkyldesSykdomEllerSkadeErGodkjentBegrunnelse = "Godkjent"
-                    )
-                )
-            }
-        }
-
-        .branch({ dto ->
             sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_6?.tilstand == AVVENTER_MANUELL_VURDERING }
         }) {
             it.forEach { personident, _ ->
@@ -168,6 +149,7 @@ internal fun topology(
                 )
             }
         }
+
         .branch({ dto ->
             sjekkTilstand(dto) { sakstype -> sakstype.paragraf_22_13?.tilstand == AVVENTER_MANUELL_VURDERING }
         }) {
@@ -183,56 +165,6 @@ internal fun topology(
                         manueltSattVirkningsdato = LocalDate.now(),
                         begrunnelseForAnnet = null
                     ),
-                )
-            }
-        }
-
-        .branch({ dto ->
-            sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_6?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
-        }) {
-            it.forEach { personident, _ ->
-                oppgavestyring.send(
-                    personident = personident,
-                    path = "kvalitetssikre/paragraf_11_6",
-                    bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
-                    body = Kvalitetssikring_11_6(
-                        løsningId = UUID.randomUUID(),
-                        erGodkjent = true,
-                        begrunnelse = "Godkjent"
-                    )
-                )
-            }
-        }
-
-        .branch({ dto ->
-            sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_19?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
-        }) {
-            it.forEach { personident, _ ->
-                oppgavestyring.send(
-                    personident = personident,
-                    path = "kvalitetssikre/paragraf_11_19",
-                    bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
-                    body = Kvalitetssikring_11_19(
-                        løsningId = UUID.randomUUID(),
-                        erGodkjent = true,
-                        begrunnelse = "Godkjent"
-                    )
-                )
-            }
-        }
-        .branch({ dto ->
-            sjekkTilstand(dto) { sakstype -> sakstype.paragraf_22_13?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
-        }) {
-            it.forEach { personident, _ ->
-                oppgavestyring.send(
-                    personident = personident,
-                    path = "kvalitetssikre/paragraf_22_13",
-                    bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
-                    body = Kvalitetssikring_22_13(
-                        løsningId = UUID.randomUUID(),
-                        erGodkjent = true,
-                        begrunnelse = "Godkjent"
-                    )
                 )
             }
         }
@@ -280,6 +212,75 @@ internal fun topology(
                     path = "kvalitetssikre/paragraf_11_4_ledd2Og3",
                     bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
                     body = Kvalitetssikring_11_4_ledd2og3(
+                        løsningId = UUID.randomUUID(),
+                        erGodkjent = true,
+                        begrunnelse = "Godkjent"
+                    )
+                )
+            }
+        }
+
+        .branch({ dto ->
+            sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_5?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
+        }) {
+            it.forEach { personident, _ ->
+                oppgavestyring.send(
+                    personident = personident,
+                    path = "kvalitetssikre/paragraf_11_5",
+                    bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // FATTER
+                    body = Kvalitetssikring_11_5(
+                        løsningId = UUID.randomUUID(),
+                        kravOmNedsattArbeidsevneErGodkjent = true,
+                        kravOmNedsattArbeidsevneErGodkjentBegrunnelse = "Godkjent",
+                        nedsettelseSkyldesSykdomEllerSkadeErGodkjent = true,
+                        nedsettelseSkyldesSykdomEllerSkadeErGodkjentBegrunnelse = "Godkjent"
+                    )
+                )
+            }
+        }
+
+        .branch({ dto ->
+            sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_6?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
+        }) {
+            it.forEach { personident, _ ->
+                oppgavestyring.send(
+                    personident = personident,
+                    path = "kvalitetssikre/paragraf_11_6",
+                    bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
+                    body = Kvalitetssikring_11_6(
+                        løsningId = UUID.randomUUID(),
+                        erGodkjent = true,
+                        begrunnelse = "Godkjent"
+                    )
+                )
+            }
+        }
+
+        .branch({ dto ->
+            sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_19?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
+        }) {
+            it.forEach { personident, _ ->
+                oppgavestyring.send(
+                    personident = personident,
+                    path = "kvalitetssikre/paragraf_11_19",
+                    bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
+                    body = Kvalitetssikring_11_19(
+                        løsningId = UUID.randomUUID(),
+                        erGodkjent = true,
+                        begrunnelse = "Godkjent"
+                    )
+                )
+            }
+        }
+        .branch({ dto ->
+            sjekkTilstand(dto) { sakstype -> sakstype.paragraf_22_13?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
+        }) {
+            it.forEach { personident, _ ->
+                oppgavestyring.send(
+                    personident = personident,
+                    path = "kvalitetssikre/paragraf_22_13",
+                    bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
+                    body = Kvalitetssikring_22_13(
                         løsningId = UUID.randomUUID(),
                         erGodkjent = true,
                         begrunnelse = "Godkjent"
