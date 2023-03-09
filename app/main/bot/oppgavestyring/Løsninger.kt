@@ -3,9 +3,9 @@ package bot.oppgavestyring
 import java.time.LocalDate
 
 internal data class Inngangsvilkår(
-    val løsning_11_2: Løsning_11_2,
+    val løsning_11_2: Løsning_11_2?,
     val løsning_11_3: Løsning_11_3,
-    val løsning_11_4: Løsning_11_4,
+    val løsning_11_4: Løsning_11_4?,
 ) {
     internal data class Løsning_11_2(val erMedlem: String)
     internal data class Løsning_11_3(val erOppfylt: Boolean)

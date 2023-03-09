@@ -35,7 +35,7 @@ internal class SøkPåNyttScheduler<V : Any>(
 
                         kafka.createProducer(config, Topics.søknad).use { producer ->
                             producer.produceSøknad(personident) {
-                                Søknader.generell(LocalDate.now().minusYears(Random.nextLong(18, 67)))
+                                Søknader.generell(LocalDate.now().minusYears(Random.nextLong(18, 62)))
                             }
                         }
                     }
