@@ -8,7 +8,10 @@ import no.nav.aap.dto.kafka.SøknadKafkaDto
 import no.nav.aap.kafka.streams.v2.Topology
 import no.nav.aap.kafka.streams.v2.topology
 import org.apache.kafka.clients.producer.Producer
+import org.slf4j.LoggerFactory
 import kotlin.time.Duration.Companion.seconds
+
+private val secureLog = LoggerFactory.getLogger("secureLog")
 
 internal fun topology(
     oppgavestyring: OppgavestyringClient,
@@ -18,8 +21,10 @@ internal fun topology(
 ): Topology = topology {
     consume(Topics.søkere)
         .filterKey { it in testSøkere }
+        .secureLogWithKey { personident, _ -> debug("Automatisk behandling av $personident") }
         .branch(TRENGER_INNGANGSVILKÅR) {
             it.forEach { personident, _ ->
+                secureLog.debug("Sender inn løsning på inngangsvilkår for $personident")
                 runBlocking {
                     oppgavestyring.løsningInngangsvilkår(personident)
                 }
@@ -27,6 +32,7 @@ internal fun topology(
         }
         .branch(TRENGER_LØSNING_LOKALKONTOR) {
             it.forEach { personident, _ ->
+                secureLog.debug("Sender inn løsning fra lokalkontor for $personident")
                 runBlocking {
                     oppgavestyring.løsningLokalkontor(personident)
                 }
@@ -34,6 +40,7 @@ internal fun topology(
         }
         .branch(TRENGER_KVALITETSSIKRING_LOKALKONTOR) {
             it.forEach { personident, _ ->
+                secureLog.debug("Sender inn kvalitetssikring fra lokalkontor for $personident")
                 runBlocking {
                     oppgavestyring.kvalitetssikreLokalkontor(personident)
                 }
@@ -41,6 +48,7 @@ internal fun topology(
         }
         .branch(TRENGER_LØSNING_NAY) {
             it.forEach { personident, _ ->
+                secureLog.debug("Sender inn løsning fra NAY for $personident")
                 runBlocking {
                     oppgavestyring.løsningNAY(personident)
                 }
@@ -48,6 +56,7 @@ internal fun topology(
         }
         .branch(TRENGER_KVALITETSSIKRING_NAY) {
             it.forEach { personident, _ ->
+                secureLog.debug("Sender inn kvalitetssikring fra NAY for $personident")
                 runBlocking {
                     oppgavestyring.kvalitetssikreNAY(personident)
                 }
@@ -56,6 +65,7 @@ internal fun topology(
         }
         .branch(SKAL_IVERKSETTES) {
             it.forEach { personident, _ ->
+                secureLog.debug("Sender inn iverksettelse for $personident")
                 runBlocking {
                     oppgavestyring.iverksett(personident)
                 }
