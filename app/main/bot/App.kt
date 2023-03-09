@@ -60,7 +60,7 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
         devtools.getTestpersoner()
     }
 
-//    resetSøkere(testPersoner, devtools, kafka, config.kafka)
+    resetSøkere(testPersoner, devtools, kafka, config.kafka)
 
     kafka.connect(
         config = config.kafka,

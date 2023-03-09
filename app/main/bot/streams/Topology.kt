@@ -4,12 +4,10 @@ import bot.devtools.DevtoolsClient
 import bot.oppgavestyring.OppgavestyringClient
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.dto.kafka.SøkereKafkaDtoHistorikk
-import no.nav.aap.dto.kafka.SøknadKafkaDto
 import no.nav.aap.kafka.streams.v2.KStreams
 import no.nav.aap.kafka.streams.v2.Topology
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.kafka.streams.v2.topology
-import org.apache.kafka.clients.producer.Producer
 import org.slf4j.LoggerFactory
 import kotlin.time.Duration.Companion.seconds
 
@@ -23,9 +21,9 @@ internal fun topology(
     testSøkere: List<String>,
 ): Topology = topology {
     consume(Topics.søkere)
-        .filterKey { personident -> personident == "1" }
-//            (personident in testSøkere).also { secureLog.debug("$personident in $testSøkere == $it") }
-//        }
+        .filterKey { personident ->
+            (personident in testSøkere).also { secureLog.debug("$personident in $testSøkere == $it") }
+        }
         .secureLogWithKey { personident, value -> debug("Automatisk behandling av $personident, søker: $value") }
         .branch(TRENGER_INNGANGSVILKÅR) {
             it.forEach { personident, _ ->
