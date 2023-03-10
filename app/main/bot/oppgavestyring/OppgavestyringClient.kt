@@ -38,7 +38,6 @@ internal class OppgavestyringClient(
 
     fun send(personident: String, path: String, bruker: Testbruker, body: Any) = runBlocking {
         val url = "${oppgavestyringConfig.host}/api/sak/$personident/$path"
-        secureLog.info("Sender inn løsning/kvalitetssikring til oppgavestyring for $personident på $url")
         val response = oppgavestyringClient.post(url) {
             contentType(ContentType.Application.Json)
             bearerAuth(tokenProvider.getAccessToken(bruker))

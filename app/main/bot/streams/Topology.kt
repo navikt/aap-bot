@@ -24,8 +24,6 @@ internal fun topology(
 ): Topology = topology {
     consume(Topics.søkere)
         .filterKey { personident -> personident in testSøkere }
-        .secureLogWithKey { personident, value -> debug("Automatisk behandling av $personident, søker: $value") }
-
         .branch({ dto ->
             sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_3?.tilstand == AVVENTER_MANUELL_VURDERING }
         }) {
@@ -172,13 +170,19 @@ internal fun topology(
         .branch({ dto ->
             sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_2?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
         }) {
-            it.forEach { personident, _ ->
+            it.forEach { personident, dto ->
+                val løsningId = dto.søkereKafkaDto.saker.single().sakstyper
+                    .single { sakstype -> sakstype.paragraf_11_2 != null }
+                    .paragraf_11_2!!
+                    .totrinnskontroller
+                    .single().løsning.løsningId
+
                 oppgavestyring.send(
                     personident = personident,
                     path = "kvalitetssikre/paragraf_11_2",
                     bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
                     body = Kvalitetssikring_11_2(
-                        løsningId = UUID.randomUUID(),
+                        løsningId = løsningId,
                         erGodkjent = true,
                         begrunnelse = "Godkjent"
                     )
@@ -189,13 +193,19 @@ internal fun topology(
         .branch({ dto ->
             sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_3?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
         }) {
-            it.forEach { personident, _ ->
+            it.forEach { personident, dto ->
+                val løsningId = dto.søkereKafkaDto.saker.single().sakstyper
+                    .single { sakstype -> sakstype.paragraf_11_3 != null }
+                    .paragraf_11_3!!
+                    .totrinnskontroller
+                    .single().løsning.løsningId
+
                 oppgavestyring.send(
                     personident = personident,
                     path = "kvalitetssikre/paragraf_11_3",
                     bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
                     body = Kvalitetssikring_11_3(
-                        løsningId = UUID.randomUUID(),
+                        løsningId = løsningId,
                         erGodkjent = true,
                         begrunnelse = "Godkjent"
                     )
@@ -206,13 +216,19 @@ internal fun topology(
         .branch({ dto ->
             sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_4AndreOgTredjeLedd?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
         }) {
-            it.forEach { personident, _ ->
+            it.forEach { personident, dto ->
+                val løsningId = dto.søkereKafkaDto.saker.single().sakstyper
+                    .single { sakstype -> sakstype.paragraf_11_4AndreOgTredjeLedd != null }
+                    .paragraf_11_4AndreOgTredjeLedd!!
+                    .totrinnskontroller
+                    .single().løsning.løsningId
+
                 oppgavestyring.send(
                     personident = personident,
                     path = "kvalitetssikre/paragraf_11_4_ledd2Og3",
                     bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
                     body = Kvalitetssikring_11_4_ledd2og3(
-                        løsningId = UUID.randomUUID(),
+                        løsningId = løsningId,
                         erGodkjent = true,
                         begrunnelse = "Godkjent"
                     )
@@ -223,13 +239,19 @@ internal fun topology(
         .branch({ dto ->
             sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_5?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
         }) {
-            it.forEach { personident, _ ->
+            it.forEach { personident, dto ->
+                val løsningId = dto.søkereKafkaDto.saker.single().sakstyper
+                    .single { sakstype -> sakstype.paragraf_11_5 != null }
+                    .paragraf_11_5!!
+                    .totrinnskontroller
+                    .single().løsning.løsningId
+
                 oppgavestyring.send(
                     personident = personident,
                     path = "kvalitetssikre/paragraf_11_5",
                     bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // FATTER
                     body = Kvalitetssikring_11_5(
-                        løsningId = UUID.randomUUID(),
+                        løsningId = løsningId,
                         kravOmNedsattArbeidsevneErGodkjent = true,
                         kravOmNedsattArbeidsevneErGodkjentBegrunnelse = "Godkjent",
                         nedsettelseSkyldesSykdomEllerSkadeErGodkjent = true,
@@ -242,13 +264,19 @@ internal fun topology(
         .branch({ dto ->
             sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_6?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
         }) {
-            it.forEach { personident, _ ->
+            it.forEach { personident, dto ->
+                val løsningId = dto.søkereKafkaDto.saker.single().sakstyper
+                    .single { sakstype -> sakstype.paragraf_11_6 != null }
+                    .paragraf_11_6!!
+                    .totrinnskontroller
+                    .single().løsning.løsningId
+
                 oppgavestyring.send(
                     personident = personident,
                     path = "kvalitetssikre/paragraf_11_6",
                     bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
                     body = Kvalitetssikring_11_6(
-                        løsningId = UUID.randomUUID(),
+                        løsningId = løsningId,
                         erGodkjent = true,
                         begrunnelse = "Godkjent"
                     )
@@ -259,13 +287,19 @@ internal fun topology(
         .branch({ dto ->
             sjekkTilstand(dto) { sakstype -> sakstype.paragraf_11_19?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
         }) {
-            it.forEach { personident, _ ->
+            it.forEach { personident, dto ->
+                val løsningId = dto.søkereKafkaDto.saker.single().sakstyper
+                    .single { sakstype -> sakstype.paragraf_11_19 != null }
+                    .paragraf_11_19!!
+                    .totrinnskontroller
+                    .single().løsning.løsningId
+
                 oppgavestyring.send(
                     personident = personident,
                     path = "kvalitetssikre/paragraf_11_19",
                     bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
                     body = Kvalitetssikring_11_19(
-                        løsningId = UUID.randomUUID(),
+                        løsningId = løsningId,
                         erGodkjent = true,
                         begrunnelse = "Godkjent"
                     )
@@ -275,13 +309,19 @@ internal fun topology(
         .branch({ dto ->
             sjekkTilstand(dto) { sakstype -> sakstype.paragraf_22_13?.tilstand == OPPFYLT_MANUELT_AVVENTER_KVALITETSSIKRING }
         }) {
-            it.forEach { personident, _ ->
+            it.forEach { personident, dto ->
+                val løsningId = dto.søkereKafkaDto.saker.single().sakstyper
+                    .single { sakstype -> sakstype.paragraf_22_13 != null }
+                    .paragraf_22_13!!
+                    .totrinnskontroller
+                    .single().løsning.løsningId
+
                 oppgavestyring.send(
                     personident = personident,
                     path = "kvalitetssikre/paragraf_22_13",
                     bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
                     body = Kvalitetssikring_22_13(
-                        løsningId = UUID.randomUUID(),
+                        løsningId = løsningId,
                         erGodkjent = true,
                         begrunnelse = "Godkjent"
                     )
@@ -289,9 +329,10 @@ internal fun topology(
             }
         }
 
-        .branch(SKAL_IVERKSETTES) {
+        .branch({ dto ->
+            dto.søkereKafkaDto.saker.any { sak -> sak.tilstand == VEDTAK_FATTET }
+        }) {
             it.forEach { personident, _ ->
-                secureLog.debug("Sender inn iverksettelse for $personident")
                 oppgavestyring.iverksett(personident)
             }
         }
@@ -318,12 +359,6 @@ private fun sjekkTilstand(
         .saker.firstOrNull { it.tilstand == AVVENTER_VURDERING || it.tilstand == AVVENTER_KVALITETSSIKRING }
         ?.sakstyper?.filter { it.aktiv }
         ?.any(sakstype) ?: false
-}
-
-
-private val SKAL_IVERKSETTES = { dto: SøkereKafkaDtoHistorikk ->
-    secureLog.debug("Sjekk iverksetting for: ${dto.søkereKafkaDto.personident}")
-    dto.søkereKafkaDto.saker.any { sak -> sak.tilstand == VEDTAK_FATTET }
 }
 
 // tilstand på vilkår
