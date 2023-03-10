@@ -8,12 +8,8 @@ import no.nav.aap.kafka.streams.v2.KStreams
 import no.nav.aap.kafka.streams.v2.Topology
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.kafka.streams.v2.topology
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.*
 import kotlin.time.Duration.Companion.seconds
-
-private val secureLog = LoggerFactory.getLogger("secureLog")
 
 internal fun topology(
     oppgavestyring: OppgavestyringClient,

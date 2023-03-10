@@ -7,6 +7,7 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
+import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import org.slf4j.LoggerFactory
 
@@ -14,7 +15,11 @@ object HttpClientFactory {
 
     fun create(loglevel: LogLevel = LogLevel.BODY): HttpClient = HttpClient(CIO) {
         install(HttpTimeout)
-        install(HttpRequestRetry)
+        install(HttpRequestRetry) {
+            maxRetries = 10
+            retryIf { _, httpResponse -> !httpResponse.status.isSuccess() }
+            delayMillis { retry -> retry * 3000L }
+        }
 
         install(Logging) {
             level = loglevel
