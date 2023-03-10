@@ -171,7 +171,7 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_11_2 != null }
                     .paragraf_11_2!!
                     .totrinnskontroller
-                    .single().løsning.løsningId
+                    .first().løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
@@ -194,7 +194,7 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_11_3 != null }
                     .paragraf_11_3!!
                     .totrinnskontroller
-                    .single().løsning.løsningId
+                    .first().løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
@@ -217,7 +217,7 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_11_4AndreOgTredjeLedd != null }
                     .paragraf_11_4AndreOgTredjeLedd!!
                     .totrinnskontroller
-                    .single().løsning.løsningId
+                    .first().løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
@@ -240,7 +240,7 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_11_5 != null }
                     .paragraf_11_5!!
                     .totrinnskontroller
-                    .single().løsning.løsningId
+                    .first().løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
@@ -265,7 +265,7 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_11_6 != null }
                     .paragraf_11_6!!
                     .totrinnskontroller
-                    .single().løsning.løsningId
+                    .first().løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
@@ -288,7 +288,7 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_11_19 != null }
                     .paragraf_11_19!!
                     .totrinnskontroller
-                    .single().løsning.løsningId
+                    .first().løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
@@ -310,7 +310,7 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_22_13 != null }
                     .paragraf_22_13!!
                     .totrinnskontroller
-                    .single().løsning.løsningId
+                    .first().løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
