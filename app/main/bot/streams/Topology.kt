@@ -305,6 +305,7 @@ internal fun topology(
             devtools = devtools,
             kafka = kafka,
             config = config,
+            testSøkere = testSøkere,
         )
     )
 }

@@ -58,7 +58,7 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
 
     val testPersoner = runBlocking {
         devtools.getTestpersoner()
-    }
+    }.take(1)
 
     resetSøkere(testPersoner, devtools, kafka, config.kafka)
 

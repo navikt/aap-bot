@@ -20,6 +20,7 @@ internal class SøkPåNyttScheduler<V : Any>(
     private val devtools: DevtoolsClient,
     private val kafka: KStreams,
     private val config: StreamsConfig,
+    private val testSøkere: List<String>,
 ) : StateScheduleProcessor<V>(
     named = "${ktable.table.stateStoreName}-cleaner",
     table = ktable,
@@ -27,15 +28,17 @@ internal class SøkPåNyttScheduler<V : Any>(
 ) {
     override fun schedule(wallClockTime: Long, store: StateStore<V>) {
         store.forEachTimestamped { personident, _, timestamp ->
-            // if record is more than 10_000 ms old
-            if (timestamp + 10_000 < wallClockTime) {
-                runBlocking {
-                    if (devtools.delete(personident)) {
-                        delay(10_000)
+            if (personident in testSøkere) {
+                // if record is more than 10_000 ms old
+                if (timestamp + 10_000 < wallClockTime) {
+                    runBlocking {
+                        if (devtools.delete(personident)) {
+                            delay(10_000)
 
-                        kafka.createProducer(config, Topics.søknad).use { producer ->
-                            producer.produceSøknad(personident) {
-                                Søknader.generell(LocalDate.now().minusYears(Random.nextLong(18, 62)))
+                            kafka.createProducer(config, Topics.søknad).use { producer ->
+                                producer.produceSøknad(personident) {
+                                    Søknader.generell(LocalDate.now().minusYears(Random.nextLong(18, 62)))
+                                }
                             }
                         }
                     }
