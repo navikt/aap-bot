@@ -171,7 +171,8 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_11_2 != null }
                     .paragraf_11_2!!
                     .totrinnskontroller
-                    .first().løsning.løsningId
+                    .first { totrinnskontroll -> totrinnskontroll.kvalitetssikring == null }
+                    .løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
@@ -194,7 +195,8 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_11_3 != null }
                     .paragraf_11_3!!
                     .totrinnskontroller
-                    .first().løsning.løsningId
+                    .first { totrinnskontroll -> totrinnskontroll.kvalitetssikring == null }
+                    .løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
@@ -217,7 +219,8 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_11_4AndreOgTredjeLedd != null }
                     .paragraf_11_4AndreOgTredjeLedd!!
                     .totrinnskontroller
-                    .first().løsning.løsningId
+                    .first { totrinnskontroll -> totrinnskontroll.kvalitetssikring == null }
+                    .løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
@@ -240,7 +243,8 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_11_5 != null }
                     .paragraf_11_5!!
                     .totrinnskontroller
-                    .first().løsning.løsningId
+                    .first { totrinnskontroll -> totrinnskontroll.kvalitetssikring == null }
+                    .løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
@@ -265,7 +269,8 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_11_6 != null }
                     .paragraf_11_6!!
                     .totrinnskontroller
-                    .first().løsning.løsningId
+                    .first { totrinnskontroll -> totrinnskontroll.kvalitetssikring == null }
+                    .løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
@@ -288,7 +293,8 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_11_19 != null }
                     .paragraf_11_19!!
                     .totrinnskontroller
-                    .first().løsning.løsningId
+                    .first { totrinnskontroll -> totrinnskontroll.kvalitetssikring == null }
+                    .løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
@@ -310,7 +316,8 @@ internal fun topology(
                     .single { sakstype -> sakstype.paragraf_22_13 != null }
                     .paragraf_22_13!!
                     .totrinnskontroller
-                    .first().løsning.løsningId
+                    .first { totrinnskontroll -> totrinnskontroll.kvalitetssikring == null }
+                    .løsning.løsningId
 
                 oppgavestyring.send(
                     personident = personident,
