@@ -2,14 +2,18 @@ package bot.streams
 
 import bot.devtools.DevtoolsClient
 import bot.oppgavestyring.*
+import bot.produceSøknad
+import bot.søknad.Søknader
+import kotlinx.coroutines.runBlocking
 import no.nav.aap.dto.kafka.SøkereKafkaDto
 import no.nav.aap.dto.kafka.SøkereKafkaDtoHistorikk
 import no.nav.aap.kafka.streams.v2.KStreams
 import no.nav.aap.kafka.streams.v2.Topology
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.kafka.streams.v2.topology
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import kotlin.time.Duration.Companion.seconds
+import kotlin.random.Random
 
 internal fun topology(
     oppgavestyring: OppgavestyringClient,
@@ -349,19 +353,24 @@ internal fun topology(
             }
         }
 
-    val vedtakTable = consume(Tables.vedtak)
-
-    vedtakTable.schedule(
-        SøkPåNyttScheduler(
-            ktable = vedtakTable,
-            interval = 10.seconds,
-            devtools = devtools,
-            kafka = kafka,
-            config = config,
-            testSøkere = testSøkere,
-        )
-    )
+    consume(Topics.vedtak) { personident, vedtak, _ ->
+        if (personident in testSøkere && vedtak != null) {
+            secureLog.debug("Sletter $personident igjen pga vedtak")
+            runBlocking {
+                if (devtools.delete(personident)) {
+                    Thread.sleep(5_000)
+                    kafka.createProducer(config, Topics.søknad).use { producer ->
+                        producer.produceSøknad(personident) {
+                            Søknader.generell(LocalDate.now().minusYears(Random.nextLong(18, 62)))
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
+
+private val secureLog = LoggerFactory.getLogger("secureLog")
 
 private fun sjekkTilstand(
     dto: SøkereKafkaDtoHistorikk,
