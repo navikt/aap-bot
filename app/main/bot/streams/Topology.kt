@@ -345,6 +345,33 @@ internal fun topology(
                 .produce(Topics.subscribeSykepengedager)
         }
 
+        // Midlertidig fix for å støtte scenarioer hvor inntekt kommer etter at alt er kvalitetssikret
+        // Alternativ: hvor i flyten skal vi vurdere/kvalitetssikre 22-13 og vente på at inntektsmelding før vi botter oss videre
+        .branch({ dto ->
+            val sak = dto.søkereKafkaDto.saker.first()
+            sak.tilstand == AVVENTER_KVALITETSSIKRING && sak.vedtak != null
+        }) {
+            it.forEach { personident, dto ->
+                val løsningId = dto.søkereKafkaDto.saker.single().sakstyper
+                    .single { sakstype -> sakstype.paragraf_22_13 != null }
+                    .paragraf_22_13!!
+                    .totrinnskontroller
+                    .first { totrinnskontroll -> totrinnskontroll.kvalitetssikring == null }
+                    .løsning.løsningId
+
+                oppgavestyring.send(
+                    personident = personident,
+                    path = "kvalitetssikre/paragraf_22_13",
+                    bruker = Testbruker.BESLUTTER_OG_FATTER_ALLE_NAVKONTOR, // BESLUTTER
+                    body = Kvalitetssikring_22_13(
+                        løsningId = løsningId,
+                        erGodkjent = true,
+                        begrunnelse = "Godkjent"
+                    )
+                )
+            }
+        }
+
         .branch({ dto ->
             dto.søkereKafkaDto.saker.any { sak -> sak.tilstand == VEDTAK_FATTET }
         }) {
