@@ -9,6 +9,9 @@ env:
 
 jobs:
   build:
+    permissions:
+      contents: "read"
+      id-token: "write"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3.3.0
@@ -29,27 +32,16 @@ jobs:
           reporter: java-junit
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: docker/login-action@v2.1.0
+      - uses: nais/docker-build-push@v0
+        id: docker-push
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          team: aap
+          tag: ${{ env.IMAGE }}
 
-      - run: |
-          docker build --pull --tag ${{ env.IMAGE }} --tag ghcr.io/${{ github.repository }}:latest .
-          docker push ghcr.io/${{ github.repository }} --all-tags
-
-  deploy:
-    concurrency:
-      group: deploy
-      cancel-in-progress: true
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v3.3.0
       - uses: nais/deploy/actions/deploy@v1
         env:
           PRINT_PAYLOAD: true
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/app.yml
+          IMAGE: ${{ steps.docker-push.outputs.image }}
