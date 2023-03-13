@@ -10,4 +10,5 @@ object Topics {
     val søknad = Topic("aap.soknad-sendt.v1", JsonSerde.jackson<SøknadKafkaDto>())
     val søkere = Topic("aap.sokere.v1", JsonSerde.jackson<SøkereKafkaDtoHistorikk>())
     val vedtak = Topic("aap.vedtak.v1", ByteArraySerde)
+    val subscribeSykepengedager = Topic("aap.subscribe-sykepengedager.v1", ByteArraySerde)
 }

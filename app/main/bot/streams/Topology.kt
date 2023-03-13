@@ -331,6 +331,15 @@ internal fun topology(
                 )
             }
         }
+        // Midlertidig fix for å hente sykepengedager på nytt
+
+        .branch({ dto ->
+            sjekkTilstand(dto) { sakstype -> sakstype.paragraf_8_48?.tilstand == AVVENTER_MASKINELL_VURDERING }
+        }) {
+            it
+                .map { _ -> "".toByteArray() }
+                .produce(Topics.subscribeSykepengedager)
+        }
 
         .branch({ dto ->
             dto.søkereKafkaDto.saker.any { sak -> sak.tilstand == VEDTAK_FATTET }
