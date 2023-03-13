@@ -7,12 +7,15 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import org.slf4j.LoggerFactory
 import java.net.URL
 import java.time.LocalDate
 
 data class DevtoolsConfig(
     val host: URL,
 )
+
+private val secureLog = LoggerFactory.getLogger("secureLog")
 
 internal class DevtoolsClient(private val config: DevtoolsConfig) {
     private val httpClient: HttpClient = HttpClientFactory.create(LogLevel.ALL)
@@ -29,7 +32,9 @@ internal class DevtoolsClient(private val config: DevtoolsConfig) {
             """
         }
 
-        return response.body<List<TombstoneStatus>>().all { it.deleted }
+        return response.body<List<TombstoneStatus>>().all { it.deleted }.also {
+            if (!it) secureLog.warn("Søker $personident ble ikke slettet")
+        }
     }
 
     suspend fun getTestpersoner(): List<TestPerson> {

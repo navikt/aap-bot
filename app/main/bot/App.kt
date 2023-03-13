@@ -60,6 +60,7 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
         devtools.getTestpersoner()
     }.take(1)
 
+    secureLog.debug("Sletter $testPersoner ved oppstart av app.")
     resetSøkere(testPersoner, devtools, kafka, config.kafka)
 
     kafka.connect(
@@ -76,6 +77,7 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
 
     routing {
         get("/reset") {
+            secureLog.debug("Sletter $testPersoner fra /rest endepunkt.")
             this@bot.resetSøkere(testPersoner, devtools, kafka, config.kafka)
             call.respondText("Resetter søkere.")
         }
@@ -107,12 +109,17 @@ private fun Application.resetSøkere(
 }
 
 internal fun Producer<String, SøknadKafkaDto>.produceSøknad(personident: String, søknad: () -> SøknadKafkaDto) {
-    val metadata = send(ProducerRecord(Topics.søknad.name, personident, søknad())).get()
-    secureLog.trace(
-        "Søknad sendt for $personident",
-        kv("key", personident),
-        kv("value", søknad()),
-        kv("partition", metadata.partition()),
-        kv("topic", metadata.topic())
-    )
+    send(ProducerRecord(Topics.søknad.name, personident, søknad())) { metadata, error ->
+        if (error != null) {
+            secureLog.error("Feil ved innsending av søknad for $personident", error)
+        } else {
+            secureLog.trace(
+                "Søknad sendt for $personident",
+                kv("key", personident),
+                kv("value", søknad()),
+                kv("partition", metadata.partition()),
+                kv("topic", metadata.topic())
+            )
+        }
+    }
 }

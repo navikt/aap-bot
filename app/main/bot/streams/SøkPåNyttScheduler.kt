@@ -10,9 +10,12 @@ import no.nav.aap.kafka.streams.v2.KTable
 import no.nav.aap.kafka.streams.v2.StateStore
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.kafka.streams.v2.processor.state.StateScheduleProcessor
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import kotlin.random.Random
 import kotlin.time.Duration
+
+private val secureLog = LoggerFactory.getLogger("secureLog")
 
 internal class SøkPåNyttScheduler<V : Any>(
     ktable: KTable<V>,
@@ -32,6 +35,7 @@ internal class SøkPåNyttScheduler<V : Any>(
                 // if record is more than 10_000 ms old
                 if (timestamp + 10_000 < wallClockTime) {
                     runBlocking {
+                        secureLog.debug("Sletter $personident fra schedulert jobb")
                         if (devtools.delete(personident)) {
                             delay(10_000)
 
