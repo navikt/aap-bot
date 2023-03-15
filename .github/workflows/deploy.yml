@@ -37,8 +37,7 @@ jobs:
           team: aap
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          tag: latest
-#          tag: ${{ github.sha }}
+          tag: ${{ github.sha }}
 
   deploy-dev:
     name: deploy dev
@@ -61,4 +60,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/app.yml
-          VAR: image=${{ steps.login.outputs.registry }}/${{ github.event.repository.name }}:latest
+          VAR: image=${{ steps.login.outputs.registry }}/${{ github.event.repository.name }}:${{ github.sha }}
