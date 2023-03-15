@@ -59,6 +59,5 @@ jobs:
           PRINT_PAYLOAD: true
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: .nais/app.yml,.nais/alert.yml
-          VARS: .nais/dev.yml
+          RESOURCE: .nais/app.yml
           VAR: IMAGE=${{ steps.login.outputs.registry }}/aap/${{ github.repository }}:${{ github.sha }}
