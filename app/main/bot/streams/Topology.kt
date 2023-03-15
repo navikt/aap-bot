@@ -4,7 +4,7 @@ import bot.devtools.DevtoolsClient
 import bot.oppgavestyring.*
 import bot.produceSøknad
 import bot.søknad.Søknader
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import no.nav.aap.dto.kafka.SøkereKafkaDto
 import no.nav.aap.dto.kafka.SøkereKafkaDtoHistorikk
 import no.nav.aap.kafka.streams.v2.KStreams
@@ -13,6 +13,7 @@ import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.kafka.streams.v2.topology
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import kotlin.coroutines.CoroutineContext
 import kotlin.random.Random
 
 internal fun topology(
@@ -345,8 +346,8 @@ internal fun topology(
                 .produce(Topics.subscribeSykepengedager)
         }
 
-        // Midlertidig fix for å støtte scenarioer hvor inntekt kommer etter at alt er kvalitetssikret
-        // Alternativ: hvor i flyten skal vi vurdere/kvalitetssikre 22-13 og vente på at inntektsmelding før vi botter oss videre
+        // Både 22-13 og sykepengedager trigger behovsutsendelse av inntekter.
+        // Skal 8-48 saksbehandles tidligere, slik at 22-13 kan bli kvalitettsikret etter at inntektene er mottatt og vi vil vurdere ny tilstand på saken (VEDTAK_FATTET)
         .branch({ dto ->
             val sak = dto.søkereKafkaDto.saker.first()
             sak.tilstand == AVVENTER_KVALITETSSIKRING && sak.vedtak != null
@@ -384,11 +385,13 @@ internal fun topology(
         if (personident in testSøkere && vedtak != null) {
             secureLog.debug("Sletter $personident igjen pga vedtak")
             runBlocking {
-                if (devtools.delete(personident)) {
-                    Thread.sleep(5_000)
-                    kafka.createProducer(config, Topics.søknad).use { producer ->
-                        producer.produceSøknad(personident) {
-                            Søknader.generell(LocalDate.now().minusYears(Random.nextLong(18, 62)))
+                launch {
+                    if (devtools.delete(personident)) {
+                        delay(10_000)
+                        kafka.createProducer(config, Topics.søknad).use { producer ->
+                            producer.produceSøknad(personident) {
+                                Søknader.generell(LocalDate.now().minusYears(Random.nextLong(18, 62)))
+                            }
                         }
                     }
                 }
