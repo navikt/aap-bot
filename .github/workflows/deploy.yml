@@ -37,7 +37,8 @@ jobs:
           team: aap
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          tag: ${{ github.sha }}
+          tag: latest
+#          tag: ${{ github.sha }}
 
   deploy-dev:
     name: deploy dev
