@@ -60,4 +60,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/app.yml
-          VAR: IMAGE=${{ steps.login.outputs.registry }}/aap/${{ github.repository }}:${{ github.sha }}
+          VAR: image=${{ steps.login.outputs.registry }}/aap/${{ github.repository }}:${{ github.sha }}
