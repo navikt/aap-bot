@@ -4,22 +4,23 @@ import bot.devtools.DevtoolsClient
 import bot.oppgavestyring.*
 import bot.produceSøknad
 import bot.søknad.Søknader
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import no.nav.aap.dto.kafka.SøkereKafkaDto
 import no.nav.aap.dto.kafka.SøkereKafkaDtoHistorikk
-import no.nav.aap.kafka.streams.v2.KStreams
+import no.nav.aap.kafka.streams.v2.Streams
 import no.nav.aap.kafka.streams.v2.Topology
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.kafka.streams.v2.topology
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import kotlin.coroutines.CoroutineContext
 import kotlin.random.Random
 
 internal fun topology(
     oppgavestyring: OppgavestyringClient,
     devtools: DevtoolsClient,
-    kafka: KStreams,
+    kafka: Streams,
     config: StreamsConfig,
     testSøkere: List<String>,
 ): Topology = topology {

@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.aap.dto.kafka.SøknadKafkaDto
-import no.nav.aap.kafka.streams.v2.KStreams
+import no.nav.aap.kafka.streams.v2.Streams
 import no.nav.aap.kafka.streams.v2.KafkaStreams
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.ktor.config.loadConfig
@@ -35,7 +35,7 @@ fun main() {
 
 private val secureLog = LoggerFactory.getLogger("secureLog")
 
-fun Application.bot(kafka: KStreams = KafkaStreams()) {
+fun Application.bot(kafka: Streams = KafkaStreams()) {
     Thread.currentThread().setUncaughtExceptionHandler { thread, exception ->
         secureLog.error("Uhåndtert feil. Thread:${thread.name}", exception)
     }
@@ -93,7 +93,7 @@ fun Application.bot(kafka: KStreams = KafkaStreams()) {
 private fun Application.resetSøkere(
     testPersoner: List<TestPerson>,
     devtools: DevtoolsClient,
-    kafka: KStreams,
+    kafka: Streams,
     kafkaConfig: StreamsConfig
 ) = launch {
     testPersoner.forEach { søker ->
