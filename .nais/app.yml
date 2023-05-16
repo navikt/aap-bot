@@ -9,7 +9,7 @@ metadata:
 spec:
   image: {{image}}
   kafka:
-    pool: nav-dev
+    pool: {{kafka-pool}}
     streams: true
   accessPolicy:
     outbound:
@@ -17,7 +17,7 @@ spec:
         - application: oppgavestyring
         - application: devtools
   ingresses:
-    - https://aap-bot.intern.dev.nav.no
+    - {{ingress}}
   azure:
     application:
       enabled: true
